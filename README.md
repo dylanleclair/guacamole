@@ -8,6 +8,8 @@ SENG 513 group project (codename guacamole)
     - this will start the Docker multi-container
     - open up Docker Desktop. 
     - once the guacamole container pops up in "Containers", the app is all ready to go!
+    - you can go to http://localhost:3000 to see the default page
+    - I've also written a page that has a preview of what the chess board might look like: http://localhost:3000/play
 
 ## from next.js readme
 
