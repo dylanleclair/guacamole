@@ -1,15 +1,18 @@
 # guacamole
+
 SENG 513 group project (codename guacamole)
 
 ## how to get started
 
 1. install Docker
-2. run the project `docker-compose up -d`
-    - this will start the Docker multi-container
-    - open up Docker Desktop. 
-    - once the guacamole container pops up in "Containers", the app is all ready to go!
-    - you can go to http://localhost:3000 to see the default page
-    - I've also written a page that has a preview of what the chess board might look like: http://localhost:3000/play
+2. install node
+   - in project folder, run "npm install"
+3. run the project `docker-compose up -d`
+   - this will start the Docker multi-container
+   - open up Docker Desktop.
+   - once the guacamole container pops up in "Containers", the app is all ready to go!
+   - you can go to http://localhost:3000 to see the default page
+   - I've also written a page that has a preview of what the chess board might look like: http://localhost:3000/play
 
 ## from next.js readme
 
@@ -40,12 +43,12 @@ Chess library we can build off of: https://github.com/jhlywa/chess.js/blob/maste
 
 - Data: [MongoDB](https://www.mongodb.com/docs/manual/installation/#std-label-tutorial-installation) (database engine) & [Mongoose](https://mongoosejs.com/docs/guide.html) (to provide access to DB)
 - Auth: [NextAuth.js](https://next-auth.js.org/)
-    - good resource: https://www.youtube.com/watch?v=e2EKSJkXkqQ
+  - good resource: https://www.youtube.com/watch?v=e2EKSJkXkqQ
 - API: built into Next!
 - realtime communication: socket.io
 
-
 ## other docker commands
+
 $ docker-compose build (1) : Build multi-container image
 $ docker image ls : projectDirectoryName-imageName
 $ docker-compose up -d (2) : Start multi-container
