@@ -1,0 +1,36 @@
+.chessboard {
+    background-image: url("https://dylanleclair.ca/pieces/checkerboard.svg");
+    background-repeat: no-repeat;
+    position: relative;
+    background-size: 100%;
+    width: 50vw;
+    height: 50vw;
+    display: grid;
+    grid: 8fr;
+    grid: 8fr;
+}
+
+.piece {
+    height: 12.5%;
+    width: 12.5%;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    position: absolute;
+    top: 0;
+}
+
+.ranklabel {
+    height: 12.5%;
+    width: 12.5%;
+    position: absolute;
+    top: 0;
+}
+
+.coordinatelight {
+    fill: black;
+}
+
+
+.coordinatedark {
+    fill: white;
+}

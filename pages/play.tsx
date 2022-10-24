@@ -4,10 +4,12 @@ import Image from "next/image";
 import styles from "../styles/Home.module.css";
 
 import { useSession, signIn, signOut } from "next-auth/react";
-import ChessBoard from "../components/chessboard/ChessBoard";
+import ChessBoard from "../components/chessboard/ChessBoard-old";
 import { IMatch } from "../models/Match";
 import { useEffect, useState } from "react";
 import { Chess } from "chess.js"
+
+import SocketIO, { io, Socket } from "socket.io-client";
 
 // Make the `request` function generic
 // to specify the return data type:
@@ -33,10 +35,22 @@ function request<T>(
 }
 
 
+const socket = SocketIO();
+
+socket.on('notif', (msg) => {
+  console.log(msg)
+})
 
 const Home: NextPage = () => {
   const { data: session } = useSession();
   const [state, setState] = useState<Chess>();
+
+
+  // create a function for making a move
+  function transmitMove(socket: Socket) {
+    // sends the move over the socket to the opposite player
+  }
+
   useEffect(() => {
     if (!state) {
       request<IMatch>("/api/match").then((result) => {
@@ -48,6 +62,10 @@ const Home: NextPage = () => {
     }
 
   }, [state]);
+
+  const emit_message = () => {
+    socket.emit('notif', 'hello :D');
+  };
 
   const signin = session ? (
     <div>
@@ -77,6 +95,8 @@ const Home: NextPage = () => {
       <main>
         {state && <ChessBoard board={state} isPlayerWhite={true} />}
       </main>
+
+      <button onClick={emit_message}>emit message</button>
 
     </div>
   );
