@@ -5,6 +5,7 @@ import Match, { type IMatch } from "../../models/Match";
 import { Chess } from 'chess.js'
 import ChessUser from "../../models/User";
 import { randomInt } from "crypto";
+import { ObjectId } from "mongodb";
 
 export default async function handler(
   req: NextApiRequest,
@@ -27,18 +28,6 @@ export default async function handler(
 
         res.status(200).json({ player1id: null, pgn: chess.pgn() });
 
-        // const lol = await ChessUser.findOne({ email: "dylan.leclair@icloud.com" });
-        // if (lol) {
-        //   console.log(lol._id);
-
-        //   const match = await Match.findOne({ player1id: lol._id.toString() });
-        //   res.status(200).json(match);
-        // } else {
-
-        //   const match = Match.create({ player1id: lol._id.toString(), pgn: chess.pgn() });
-        //   res.status(200).json(match);
-        // }
-
       } catch (error) {
         console.log(error);
         res.status(400).json({});
@@ -53,15 +42,16 @@ export default async function handler(
         }
         console.log(chess.pgn());
         // random chess game
-        let m = Match.create({
-          player1id: '632a1a8b180d94e0b9e65d09',
-          player2id: '',
+        let m = await Match.create<IMatch>({
+          player1id: new ObjectId('6346e3c2eef101eb4eb8e65e'),
+          player2id: new ObjectId('635706046bc4c9602b6a8ffd'),
           pgn: chess.pgn(),
+          ongoing: true
         });
-        m.then((data) => {
-          res.status(200).json(data);
+
+        if (m) {
+          res.status(200).json(m);
         }
-        );
 
       } catch (error) {
         res.status(400).json({ success: false });

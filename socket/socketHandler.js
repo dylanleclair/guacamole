@@ -3,7 +3,6 @@ exports.__esModule = true;
 exports.createSocketHandler = void 0;
 function createSocketHandler(server) {
     return function socketHandler(io) {
-        io.join("6355e10a9efe7f3ce4f1fbea");
         function disconnect() {
             console.log("client disconnected");
         }
@@ -14,7 +13,7 @@ function createSocketHandler(server) {
             // in this case, see if both players have joined.
             console.log("joining room " + msg);
             io.join(msg);
-            io.to("6355e10a9efe7f3ce4f1fbea").emit("notif", "room notif");
+            io.to(msg).emit("notif", "room notif");
         });
         io.on("notif", function (msg) {
             console.log(msg);

@@ -4,8 +4,6 @@ import { Server, Socket } from "socket.io";
 export function createSocketHandler(server: Server) {
     return function socketHandler(io: Socket) {
 
-        io.join("6355e10a9efe7f3ce4f1fbea")
-
         function disconnect() {
             console.log("client disconnected")
         }
@@ -21,7 +19,7 @@ export function createSocketHandler(server: Server) {
             console.log("joining room " + msg)
             io.join(msg);
 
-            io.to("6355e10a9efe7f3ce4f1fbea").emit("notif", "room notif");
+            io.to(msg).emit("notif", "room notif");
         })
 
         io.on("notif", (msg) => {

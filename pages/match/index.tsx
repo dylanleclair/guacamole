@@ -12,6 +12,7 @@ import { Chess } from "chess.js"
 import ChessBoard from "../../components/chessboard/ChessBoard";
 
 import SocketIO, { io, Socket } from "socket.io-client";
+import User, { IUser } from "../../models/User";
 
 // Make the `request` function generic
 // to specify the return data type:
@@ -48,16 +49,32 @@ interface PlayInteface {
     board: Chess,
     moves: string[]
     input: string
+    matchId: string
+    selection: string
 }
 
 const defaultProps = {
     board: new Chess(),
     moves: [],
     input: '',
+    matchId: "",
+    selection: "",
 }
 
 
 
+function MatchFinder() {
+
+
+    // display "find match button", that's it. 
+
+    return (
+        <div>
+
+        </div>
+    )
+
+}
 
 
 
@@ -81,19 +98,23 @@ const Home: NextPage = () => {
     }
 
     useEffect(() => {
+
         // load the match id from the database
         if (isInitialLoad) {
-            request<IMatch>(`/api/match/6355e10a9efe7f3ce4f1fbea`).then((result) => {
+            request<IMatch>(`/api/match/active`).then((result) => {
+                console.log("hello!")
                 console.log(result)
                 let chess = new Chess();
                 chess.loadPgn(result.pgn);
 
                 console.log(chess.moves())
 
-                setState({ ...state, board: chess });
+                setState({ ...state, board: chess, matchId: result._id });
+
+                socket.emit("match_connect", result._id);
             });
 
-            socket.emit("match_connect", "6355e10a9efe7f3ce4f1fbea")
+
 
             isInitialLoad = false;
         }
@@ -136,7 +157,7 @@ const Home: NextPage = () => {
         let result = s.move(state.input)
 
         if (result) {
-            socket.emit('notif', { game: id, move: state.input });
+            socket.emit('notif', { game: state.matchId, move: state.input });
 
             setState({
                 ...state,
@@ -146,6 +167,9 @@ const Home: NextPage = () => {
         }
 
     };
+
+
+    // check if the user is signed in. if they are, show them the matchmaking component
 
     const signin = session ? (
         <div>
@@ -176,9 +200,16 @@ const Home: NextPage = () => {
             {signin}
 
             <main>
-                <div>Match: {id}</div>
+                <div>Match: {state.matchId}</div>
 
-                {state && <ChessBoard board={state.board} isPlayerWhite={true} selection="" setSelection={() => { }} />}
+                {state && <ChessBoard board={state.board} isPlayerWhite={true} selection={state.selection} setSelection={(selection: string) => {
+                    setState(
+                        {
+                            ...state,
+                            selection: selection
+                        }
+                    );
+                }} />}
             </main>
 
 

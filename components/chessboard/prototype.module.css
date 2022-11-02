@@ -1,15 +1,3 @@
-.chessboard {
-    background-image: url("https://dylanleclair.ca/pieces/checkerboard.svg");
-    background-repeat: no-repeat;
-    position: relative;
-    background-size: 100%;
-    width: 50vw;
-    height: 50vw;
-    display: grid;
-    grid: 8fr;
-    grid: 8fr;
-}
-
 .piece {
     height: 12.5%;
     width: 12.5%;
@@ -19,18 +7,25 @@
     top: 0;
 }
 
-.ranklabel {
-    height: 12.5%;
-    width: 12.5%;
+.container {
+    position: relative;
+    width: 60vw;
+    height: 60vw;
+}
+
+.labels {
+    top: 0px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.potentialMoves {
     position: absolute;
     top: 0;
-}
 
-.coordinatelight {
-    fill: black;
-}
-
-
-.coordinatedark {
-    fill: white;
+    /* height and width must be equal, and (margin * 2) + width MUST equal 100 for it to be centered*/
+    height: 30%;
+    width: 30%;
+    margin: 35%;
 }
