@@ -97,6 +97,11 @@ const Home: NextPage = () => {
         // sends the move over the socket to the opposite player
     }
 
+
+    function makeMove() {
+
+    }
+
     useEffect(() => {
 
         // load the match id from the database

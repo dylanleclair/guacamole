@@ -1,5 +1,10 @@
-import { match } from "assert";
+
+import Match, { type IMatch } from "../models/Match";
 import { Server, Socket } from "socket.io";
+import { ObjectId } from "mongodb";
+import { Chess } from "chess.js";
+
+let PROXY = "http://localhost:3000/"
 
 export function createSocketHandler(server: Server) {
     return function socketHandler(io: Socket) {
@@ -26,6 +31,19 @@ export function createSocketHandler(server: Server) {
             console.log(msg);
             console.log("hi");
             io.to(msg.game).emit("move", msg.move);
+
+            console.log("wtf?");
+            // load the database
+            // we want to post the move to the database / next API
+            fetch(PROXY + "api/match/", { method: "PATCH", body: JSON.stringify(msg) }).then((res) => {
+                res.json().then((data) => {
+                    console.log(data);
+                })
+            });
+
+            // should probably wait until successful response from server before sending message back to user!
+
+
         })
 
     }

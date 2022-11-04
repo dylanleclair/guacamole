@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
 exports.createSocketHandler = void 0;
+var PROXY = "http://localhost:3000/";
 function createSocketHandler(server) {
     return function socketHandler(io) {
         function disconnect() {
@@ -19,6 +20,14 @@ function createSocketHandler(server) {
             console.log(msg);
             console.log("hi");
             io.to(msg.game).emit("move", msg.move);
+            console.log("wtf?");
+            // load the database
+            // we want to post the move to the database / next API
+            fetch(PROXY + "api/match/", { method: "PATCH", body: JSON.stringify(msg) }).then(function (res) {
+                res.json().then(function (data) {
+                    console.log(data);
+                });
+            });
         });
     };
 }

@@ -21,6 +21,7 @@ export default async function handler(
             try {
 
                 if (typeof id === 'string') {
+                    console.log(id);
                     const matchData = await Match.findOne({ _id: new ObjectId(id) }).exec();
                     if (matchData) {
                         res.status(200).json(matchData);
