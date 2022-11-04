@@ -1,3 +1,6 @@
+# Original subprocess implementation, left for posterity
+# Swapped from this version with subprocess because I ended up needing an OO
+# Wrapper anyways inside flask, so went with https://github.com/zhelyabuzhsky/stockfish
 import sys
 import subprocess
 from time import sleep
