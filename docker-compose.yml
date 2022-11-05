@@ -3,6 +3,14 @@ volumes:
   docker:
 
 services:
+
+  # engine:
+  #   build: ./engine-testing
+  #   restart: always
+  #   ports:
+  #     - 8228:5000
+  #   privileged: true
+
   mongo:
     image: mongo
     restart: always
@@ -34,3 +42,4 @@ services:
       MONGODB_URI: mongodb://root:example@mongo:27017/
     depends_on:
       - mongo
+  

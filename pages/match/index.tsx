@@ -84,7 +84,6 @@ const Home: NextPage = () => {
     const { data: session } = useSession();
     const [state, setState] = useState<PlayInteface>(defaultProps);
     const router = useRouter();
-    const { id } = router.query;
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const old = { ...state };
@@ -107,16 +106,20 @@ const Home: NextPage = () => {
         // load the match id from the database
         if (isInitialLoad) {
             request<IMatch>(`/api/match/active`).then((result) => {
-                console.log("hello!")
-                console.log(result)
-                let chess = new Chess();
-                chess.loadPgn(result.pgn);
+                if (result) {
 
-                console.log(chess.moves())
+                    // check whether the user is black or white
 
-                setState({ ...state, board: chess, matchId: result._id });
+                    let chess = new Chess();
+                    chess.loadPgn(result.pgn);
 
-                socket.emit("match_connect", result._id);
+                    console.log(chess.moves())
+
+                    setState({ ...state, board: chess, matchId: result._id });
+
+                    socket.emit("match_connect", result._id);
+                }
+
             });
 
 
@@ -220,6 +223,9 @@ const Home: NextPage = () => {
 
             <input value={state.input} onChange={handleChange}></input>
             <button onClick={emit_message}>emit message</button>
+
+            <h2>Color</h2>
+            {/* <div>{state.color}</div> */}
 
             <h2>Moves</h2>
             <ol>
