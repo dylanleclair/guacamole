@@ -28,6 +28,7 @@ function createSocketHandler(server) {
                     console.log(data);
                 });
             });
+            // should probably wait until successful response from server before sending message back to user!
         });
     };
 }
