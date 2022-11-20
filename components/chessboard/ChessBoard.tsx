@@ -1,11 +1,7 @@
 import { Chess, Move } from "chess.js";
-
 import { css } from "@emotion/react";
-
-import styles from "./prototype.module.css";
-
+import styles from "./chessboard.module.css";
 import React, { MouseEvent, useRef } from "react";
-import { stringify } from "querystring";
 
 interface Position {
   x: number;
@@ -134,7 +130,6 @@ function getPossibleMoves(
         </div>
       );
     });
-
   return movesDrawn;
 }
 
@@ -412,7 +407,6 @@ export default function NewBoard(props: ChessBoardProps) {
       >
         {pieces && pieces}
         {possibleMoves && possibleMoves}
-
         {Labels(props.perspective, light, dark)}
       </Background>
     </div>
