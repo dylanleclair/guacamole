@@ -42,29 +42,43 @@ async def index() -> str:
 
 @app.route("/fen", methods=["POST"])
 async def sendfen() -> Response:
-    """Allows you to send a fen position to stockfish and get a response with the best move
+    """Allows you to send a fen position to stockfish and get a response with:
+        1. best move
+        2. top 3
+        3. wdl (win, draw, loss)
 
     Returns
     -------
     Response
-        A JSON response with the calculated best move for the given fen
+        A JSON response with the calculated best move, top 3 and wdl
         
     Example
     -------
-    (Assumes server is running on port 5000)
+    (Assumes server is running on port 8228)
     ```
     import requests
     r = requests.post( 
-        "http://localhost:5000/fen", 
+        "http://localhost:8228/fen", 
         json={ "fen":"6qk/8/5P1p/8/8/6QP/5PP1/4R1K1 w - - 0 1"}
     )
-    r.json() # {'move': 'e1e8'}
+    r.json() # {'move': 'e1e8',
+                'top_3': [
+                    {'Centipawn': None,'Mate': 2, 'Move': 'e1e8'},
+                    {'Centipawn': None, 'Mate': 3, 'Move': 'g3c7'},
+                    {'Centipawn': 6288, 'Mate': None, 'Move': 'g3g8'}
+                ], 
+                'wdl': [1000, 0, 0]}
     ```
     """
     content = request.json["fen"]
     stockfish.set_fen_position(content)
     move = stockfish.get_best_move()
-    return jsonify({"move":move})
+    response = {
+        "move":move,
+        "top_3":stockfish.get_top_moves(3), # https://github.com/zhelyabuzhsky/stockfish#get-info-on-the-top-n-moves
+        "wdl":stockfish.get_wdl_stats() # https://github.com/zhelyabuzhsky/stockfish#get-stockfishs-windrawloss-stats-for-the-side-to-move-in-the-current-position
+    }
+    return jsonify(response)
 
 if __name__ == '__main__': # if app.py is run directly
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=8228)
