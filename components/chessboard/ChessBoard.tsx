@@ -183,16 +183,7 @@ export default function NewBoard(props: ChessBoardProps) {
 
 
   return (
-    <div>
-
-      {/* <div ref={boardRef} className={styles.chessboard} css={css``} onMouseDown={mouseDown} >
-
-        {pieces && pieces}
-
-        <Labels />
-
-      </div> */}
-
+    <div className={styles.container}>
 
       <Background refToPass={boardRef} light={COLORSCHEME.light} dark={COLORSCHEME.dark} onClickHandler={handleClick}>
         {pieces && pieces}
@@ -230,7 +221,7 @@ function Background(props: BoardColor) {
   console.log("RENDERING BACKGROUND!")
 
   return (
-    <div ref={props.refToPass} className={styles.container} onClick={props.onClickHandler}>
+    <div ref={props.refToPass} onClick={props.onClickHandler}>
       <svg width="100%" height="100%" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg" >
         <g clip-path="url(#clip0_37_2)">
           <rect width="800" height="800" fill={`${light}`} />

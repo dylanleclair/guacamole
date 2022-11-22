@@ -1,3 +1,17 @@
+.flex-row {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  justify-content: center;
+  align-items: center;
+}
+
 html,
 body {
   padding: 0;
@@ -19,8 +33,13 @@ a {
   html {
     color-scheme: dark;
   }
+
   body {
     color: white;
     background: black;
   }
+}
+
+body {
+  padding-top: 70px;
 }
