@@ -4,12 +4,12 @@ volumes:
 
 services:
 
-  # engine:
-  #   build: ./engine-testing
-  #   restart: always
-  #   ports:
-  #     - 8228:5000
-  #   privileged: true
+  engine:
+    build: ./engine-testing
+    restart: always
+    ports:
+      - 8228:5000
+    privileged: true
 
   mongo:
     image: mongo
