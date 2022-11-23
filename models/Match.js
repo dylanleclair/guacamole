@@ -9,6 +9,7 @@ var MatchSchema = new mongoose_1["default"].Schema({
     player1id: { type: mongoose_1["default"].Schema.Types.ObjectId, required: true },
     player2id: { type: mongoose_1["default"].Schema.Types.ObjectId, required: false },
     pgn: { type: String, required: true },
-    ongoing: { type: Boolean, required: true }
+    ongoing: { type: Boolean, required: true },
+    winner: { type: mongoose_1["default"].Schema.Types.ObjectId, required: false }
 });
 exports["default"] = mongoose_1["default"].models.Match || mongoose_1["default"].model("Match", MatchSchema);

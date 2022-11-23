@@ -30,6 +30,7 @@ export function createSocketHandler(server: Server) {
         io.on("notif", (msg) => {
             console.log(msg);
             console.log("hi");
+
             io.to(msg.game).emit("move", msg.move);
 
             console.log("wtf?");
