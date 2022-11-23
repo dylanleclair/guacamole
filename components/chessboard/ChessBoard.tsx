@@ -2,7 +2,7 @@ import { Chess, Move } from "chess.js";
 
 import { css } from '@emotion/react'
 
-import styles from './prototype.module.css'
+import styles from './chessboard.module.css'
 
 import React, { MouseEvent, useRef } from 'react';
 
