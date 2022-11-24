@@ -3,15 +3,15 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import "../../../lib/databaseConnection";
 import User, { type IUser } from "../../../models/User";
 
-import { unstable_getServerSession } from "next-auth/next"
-import { authOptions } from "../auth/[...nextauth]"
+import { unstable_getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]";
 import { getSession } from "next-auth/react";
 
 type Data = {};
 
 enum ERROR_CODE {
   success,
-  fail
+  fail,
 }
 
 export default async function handler(
@@ -21,7 +21,6 @@ export default async function handler(
   const { method } = req;
 
   const session = await getSession({ req });
-
 
   switch (method) {
     case "GET":
