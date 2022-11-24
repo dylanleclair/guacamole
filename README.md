@@ -12,7 +12,15 @@ SENG 513 group project (codename guacamole)
    - open up Docker Desktop.
    - once the guacamole container pops up in "Containers", the app is all ready to go!
    - you can go to http://localhost:3000 to see the default page
-   - I've also written a page that has a preview of what the chess board might look like: http://localhost:3000/play
+   - I've also written a page that has a preview of what the chess board might look like: http://localhost:3000/match
+
+next-auth is working, but you must add your own secret for next-auth in a .env.local file. for example mine is:
+```
+GITHUB_ID=<secret>
+GITHUB_SECRET=<secret>
+
+MONGODB_URI=mongodb://root:example@mongo:27017/myapp
+```
 
 ## from next.js readme
 
@@ -22,7 +30,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+[API routes](https://nextjs.org/docs/api-routes/introduction)
 
 The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
