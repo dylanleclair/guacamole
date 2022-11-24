@@ -3,12 +3,11 @@ volumes:
   docker:
 
 services:
-
   engine:
     build: ./engine-testing
     restart: always
     ports:
-      - 8228:5000
+      - 8228:8228
     privileged: true
 
   mongo:
@@ -27,11 +26,6 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
-  engine:
-    build: ./engine-testing
-    restart: always
-    ports:
-      - 8228:8228
   next:
     build: .
     restart: always
