@@ -34,19 +34,23 @@ export default async function handler(
       }
       break;
     case "POST":
+
       try {
         let chess = new Chess();
-        for (let i = 0; i < 20; i++) {
-          let index = randomInt(chess.moves().length);
-          chess.move(chess.moves()[index]);
-        }
-        console.log(chess.pgn());
+        // for (let i = 0; i < 20; i++) {
+        //   let index = randomInt(chess.moves().length);
+        //   chess.move(chess.moves()[index]);
+        // }
+        // console.log(chess.pgn());
+
+        console.log(req.body.playerid);
+
+
         // random chess game
         let m = await Match.create<IMatch>({
-          player1id: new ObjectId('6346e3c2eef101eb4eb8e65e'),
-          player2id: new ObjectId('635706046bc4c9602b6a8ffd'),
+          player1id: new ObjectId(req.body.playerid),
           pgn: chess.pgn(),
-          ongoing: true
+          ongoing: false,
         });
 
         if (m) {
@@ -54,10 +58,10 @@ export default async function handler(
         }
 
       } catch (error) {
+        console.log(error);
         res.status(400).json({ success: false });
       }
       break;
-
     case "PATCH":
       try {
 
@@ -70,30 +74,55 @@ export default async function handler(
         let id: string = data.game
         let move: string = data.move;
 
-        // find the match
-
+        // else, try and make the move normally
         let matchId = new ObjectId(id);
         let m = await Match.findOne<IMatch>({ _id: matchId }).exec();
 
         if (m) {
-          // make the move sent to endpoint
-          console.log("found a match!");
+          // if player resigned, update winner & exit.
+
+          console.log("found the match!");
+
+          // check if the game has been surrendered
+          if (move.includes("resigns")) {
+            console.log('PLAYER HAS RESIGNED:', move);
+            let winner = move.split(" ")[0];
+            // if white, player1 wins
+            // if black, player2 wins
+            let winnerId = m.player1id;
+            if (winner === "black") {
+              if (m.player2id) {
+                winnerId = m.player2id
+              }
+            }
+
+            await Match.where({ _id: matchId }).update({ winner: winnerId, ongoing: false }).exec().then(() => {
+              res.status(200).json(move);
+            });
+            return;
+          }
+
+          // else, 
+          // make the move sent to endpoint normally
           let game = new Chess();
+
+          // try to load the game according to pgn in database
           game.loadPgn(m.pgn);
-          game.move(move);
+          // try and make the move being posted
+          let validMove = game.move(move);
 
-          // update database!
-          Match.where({ _id: matchId }).update({ pgn: game.pgn() }).exec().then(() => {
-            console.log("match updated!");
-            res.status(200);
-
-          });
-
+          if (validMove) {
+            // update database!
+            await Match.where({ _id: matchId }).update({ pgn: game.pgn() }).exec().then(() => {
+              res.status(200).json({ ...m, pgn: game.pgn() });
+            });
+          } else {
+            throw new Error("Move could not be handled by API.")
+          }
 
 
         } else {
-          res.status(400);
-
+          throw new Error("Match could not be found in database.")
         }
 
       } catch (error) {

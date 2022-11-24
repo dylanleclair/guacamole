@@ -15,12 +15,16 @@ export default function App({ Component, pageProps }: AppProps) {
     require("bootstrap/dist/js/bootstrap.js");
   }, []);
 
+  // TODO: add fetch of user data here.
+
   return (
     <SessionProvider
       // Provider options are not required but can be useful in situations where
       // you have a short session maxAge time. Shown here with default values.
       session={pageProps.session}
     >
+
+
       <Layout>
         <Component {...pageProps} />
       </Layout>

@@ -1,18 +1,24 @@
+import { WebsocketAction } from "../../lib/emit_messages";
+
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+
 import styles from "../../styles/Home.module.css";
-import { useRouter } from 'next/router'
 
 import { useSession, signIn, signOut } from "next-auth/react";
 import { IMatch } from "../../models/Match";
 import { useEffect, useState } from "react";
-import { Chess } from "chess.js"
+import { Chess, Move } from "chess.js"
+
+
 
 import ChessBoard from "../../components/chessboard/ChessBoard";
 
 import SocketIO, { io, Socket } from "socket.io-client";
-import User, { IUser } from "../../models/User";
+import ChessUser, { IUser } from "../../models/User";
+import MatchFinder from "../../components/MatchFinder/MatchFinder";
+
 
 // Make the `request` function generic
 // to specify the return data type:
@@ -45,12 +51,22 @@ socket.on('notif', (msg) => {
 })
 
 
+interface MatchMetadata {
+    winner: string,
+    method: string,
+}
+
 interface PlayInteface {
     board: Chess,
     moves: string[]
     input: string
     matchId: string
-    selection: string
+    selection: string,
+    isPlayerWhite: boolean
+    user: IUser | null,
+    isMatchOver: boolean,
+    matchData: MatchMetadata,
+    perspective: string
 }
 
 const defaultProps = {
@@ -59,31 +75,18 @@ const defaultProps = {
     input: '',
     matchId: "",
     selection: "",
+    isPlayerWhite: true,
+    user: null,
+    isMatchOver: false,
+    matchData: { winner: "", method: "" },
+    perspective: "white"
 }
-
-
-
-function MatchFinder() {
-
-
-    // display "find match button", that's it. 
-
-    return (
-        <div>
-
-        </div>
-    )
-
-}
-
-
 
 let isInitialLoad = true;
 
 const Home: NextPage = () => {
     const { data: session } = useSession();
     const [state, setState] = useState<PlayInteface>(defaultProps);
-    const router = useRouter();
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const old = { ...state };
@@ -91,51 +94,92 @@ const Home: NextPage = () => {
         setState(old);
     }
 
-    // create a function for making a move
-    function transmitMove(socket: Socket) {
-        // sends the move over the socket to the opposite player
-    }
-
-
-    function makeMove() {
-
-    }
+    console.log("re-render time :D ", state.board.board())
 
     useEffect(() => {
 
         // load the match id from the database
         if (isInitialLoad) {
-            request<IMatch>(`/api/match/active`).then((result) => {
+
+
+            // get the user data from the user endpoint
+            request<IUser>('/api/user').then((result) => {
+                let user: IUser | null = null;
+                let isPlayerWhite = true;
+
+
                 if (result) {
+                    user = result;
+                    console.log(user);
 
-                    // check whether the user is black or white
-
-                    let chess = new Chess();
-                    chess.loadPgn(result.pgn);
-
-                    console.log(chess.moves())
-
-                    setState({ ...state, board: chess, matchId: result._id });
-
-                    socket.emit("match_connect", result._id);
+                } else {
+                    throw Error("User does not exist?");
                 }
 
-            });
+
+                fetch('/api/match/active').then((response) => {
+                    if (response.ok) {
+                        response.json().then((data) => {
+                            let result = data as IMatch;
 
 
+                            if (user) {
+                                isPlayerWhite = (user._id === result.player1id) ? true : false;
+                            }
+
+
+
+                            let chess = new Chess();
+                            chess.loadPgn(result.pgn);
+
+                            console.log(chess.moves())
+
+                            setState({ ...state, board: chess, matchId: result._id, isPlayerWhite: isPlayerWhite, user: user, perspective: (isPlayerWhite) ? 'white' : 'black' });
+
+                            socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
+
+                        });
+                    } else {
+                        // what to do when no match could be fetched!
+                        setState({ ...state, user: user, perspective: 'white' });
+
+                    }
+                })
+
+            })
 
             isInitialLoad = false;
         }
 
+        socket.on(WebsocketAction.MATCH_START, (match) => {
+            // update the data like we do when first forming a connection !!!
+            // -> might want to move that stuff into a function tbh
+            console.log(match);
+        })
 
         // set socket move handler
-        socket.on("move", (msg) => {
+        socket.on(WebsocketAction.MOVE_RECEIVED, (msg) => {
 
             if (state) {
-                console.log("Received move: " + msg);
+                // console.log("Received move: " + msg);
+
+                // check if the game is over
+                if (msg.includes("resigns")) {
+                    let winner = (msg.split(" ")[0] === 'white') ? 'black' : 'white';
+
+                    let matchData = { winner: winner, method: "resignation" };
+
+                    setState({
+                        ...state,
+                        isMatchOver: true,
+                        matchData: matchData
+                    })
+                    return; // game is finished
+                }
+
                 let s = new Chess(state.board.fen());
                 let result = s.move(msg)
-                console.log("New moves: ", s.moves())
+                // console.log("New moves: ", s.moves())
 
                 if (result) {
                     setState({
@@ -149,15 +193,25 @@ const Home: NextPage = () => {
 
         });
 
+
         console.log("state change!");
 
         return () => {
             socket.off('connect');
             socket.off('disconnect');
             socket.off('move');
+            socket.off(WebsocketAction.MATCH_START)
         };
 
     }, [state]);
+
+
+    function flipBoard() {
+        setState({
+            ...state,
+            perspective: (state.perspective === "white") ? "black" : "white",
+        })
+    }
 
     const emit_message = () => {
 
@@ -165,7 +219,7 @@ const Home: NextPage = () => {
         let result = s.move(state.input)
 
         if (result) {
-            socket.emit('notif', { game: state.matchId, move: state.input });
+            socket.emit(WebsocketAction.MOVE, { game: state.matchId, move: state.input });
 
             setState({
                 ...state,
@@ -175,6 +229,53 @@ const Home: NextPage = () => {
         }
 
     };
+
+    function makeMove(moveToMake: Move) {
+        let s = new Chess(state.board.fen());
+        let result = s.move(moveToMake);
+
+        console.log("MAKING THE MOVE: ", moveToMake);
+
+        if (result) {
+            console.log("MOVE SUCCESS: ", moveToMake);
+
+            socket.emit(WebsocketAction.MOVE, { game: state.matchId, move: moveToMake.san });
+
+            console.log(s.board())
+            console.log(state.board.board())
+
+            setState({
+                ...state,
+                board: s,
+                moves: [...state.moves, moveToMake.san],
+            })
+        }
+    };
+
+    function onMatchRequest() {
+        console.log("requesting match", state.user)
+        socket.emit(WebsocketAction.MATCH_REQUEST, state.user);
+    }
+
+    function surrender() {
+        // we need to tell websocket player got rekt & wants to give up
+
+        // let result = s.move(state.input); 
+        let playercolor = (state.isPlayerWhite) ? 'white' : 'black';
+        let enemycolor = (state.isPlayerWhite) ? 'black' : 'white';
+
+        socket.emit(WebsocketAction.MOVE, { game: state.matchId, move: `${playercolor} resigns` });
+
+        let matchData = { winner: enemycolor, method: "resignation" };
+
+        setState({
+            ...state,
+            isMatchOver: true,
+            matchData: matchData
+        })
+
+
+    }
 
 
     // check if the user is signed in. if they are, show them the matchmaking component
@@ -207,10 +308,16 @@ const Home: NextPage = () => {
 
             {signin}
 
+            {state.matchId === "" && <MatchFinder onFindMatch={onMatchRequest} />}
+
             <main>
                 <div>Match: {state.matchId}</div>
 
-                {state && <ChessBoard board={state.board} isPlayerWhite={true} selection={state.selection} setSelection={(selection: string) => {
+                <div>Player color: {(state.isPlayerWhite) ? "white" : "black"}</div>
+
+                {state.isMatchOver && GameOver(state.matchData)}
+
+                {state && <ChessBoard board={state.board} perspective={state.perspective} isPlayerWhite={state.isPlayerWhite} selection={state.selection} makeAmove={makeMove} setSelection={(selection: string) => {
                     setState(
                         {
                             ...state,
@@ -219,6 +326,7 @@ const Home: NextPage = () => {
                     );
                 }} />}
             </main>
+
 
 
             <input value={state.input} onChange={handleChange}></input>
@@ -231,8 +339,27 @@ const Home: NextPage = () => {
             <ol>
                 {state.moves && moves_cmpnt}
             </ol>
+
+
+            <button onClick={surrender}>surrender</button>
+            <button onClick={flipBoard}>flip perspective</button>
+
         </div>
     );
 };
+
+
+/**
+ * Displays the winner of the game and how they won
+ * @param matchData 
+ * @returns 
+ */
+function GameOver(matchData: MatchMetadata) {
+    return (
+        <h3>{matchData.winner} wins by {matchData.method}</h3>
+    )
+}
+
+
 
 export default Home;
