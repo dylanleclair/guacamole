@@ -9,6 +9,9 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v2
+      with:
+          # Make sure the actual branch is checked out when running on pull requests
+          ref: ${{ github.head_ref }}
     - name: Prettier Formatting
       uses: creyD/prettier_action@v4.2
       with:
