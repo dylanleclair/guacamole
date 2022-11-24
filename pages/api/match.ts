@@ -3,9 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import "../../lib/databaseConnection";
 import Match, { type IMatch } from "../../models/Match";
 import { Chess } from "chess.js";
-import ChessUser from "../../models/User";
-import { randomInt } from "crypto";
 import { ObjectId } from "mongodb";
+import { match } from "assert";
 
 export default async function handler(
   req: NextApiRequest,
@@ -114,13 +113,25 @@ export default async function handler(
           let validMove = game.move(move);
 
           if (validMove) {
-            // update database!
-            await Match.where({ _id: matchId })
-              .update({ pgn: game.pgn() })
-              .exec()
-              .then(() => {
-                res.status(200).json({ ...m, pgn: game.pgn() });
-              });
+            console.log("MOVE: ", move);
+
+            if (game.isGameOver()) {
+              // update database!
+              await Match.where({ _id: matchId })
+                .update({ pgn: game.pgn(), ongoing: false })
+                .exec()
+                .then(() => {
+                  res.status(200).json({ ...m, pgn: game.pgn() });
+                });
+            } else {
+              // update database!
+              await Match.where({ _id: matchId })
+                .update({ pgn: game.pgn() })
+                .exec()
+                .then(() => {
+                  res.status(200).json({ ...m, pgn: game.pgn() });
+                });
+            }
           } else {
             throw new Error("Move could not be handled by API.");
           }
@@ -128,6 +139,7 @@ export default async function handler(
           throw new Error("Match could not be found in database.");
         }
       } catch (error) {
+        console.log(error);
         res.status(400).json({ success: false });
       }
   }
