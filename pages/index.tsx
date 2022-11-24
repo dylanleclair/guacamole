@@ -5,7 +5,6 @@ import styles from "../styles/Home.module.css";
 
 import ChessBoard from "../components/chessboard/ChessBoard";
 
-
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Chess } from "chess.js";
 import Link from "next/link";
@@ -21,28 +20,41 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-
       <main className="container">
-
         <section id="home-main" className={`flex-col flex-center`}>
-
-
           <img src="/logo.svg" className="" />
 
-          <div className={`display-4 text-center w-100 mb-3`}>The world's favourite online chess arcade.</div>
+          <div className={`display-4 text-center w-100 mb-3`}>
+            The world's favourite online chess arcade.
+          </div>
 
-          <ChessBoard board={new Chess()} isPlayerWhite={true} selection={""} setSelection={() => { }} />
+          <ChessBoard
+            board={new Chess()}
+            isPlayerWhite={true}
+            selection={""}
+            setSelection={() => {}}
+            perspective={"white"}
+            makeAmove={() => {}}
+          />
 
           <div className="row justify-content-center w-100">
             <div className="col-11">
               <div className="d-grid gap-3 w-100 my-3">
-                <button className="btn btn-lg btn-primary text-white" type="button">Login</button>
-                <button className="btn btn-lg btn-primary text-white" type="button">Signup</button>
+                <button
+                  className="btn btn-lg btn-primary text-white"
+                  type="button"
+                >
+                  Login
+                </button>
+                <button
+                  className="btn btn-lg btn-primary text-white"
+                  type="button"
+                >
+                  Signup
+                </button>
               </div>
             </div>
-
           </div>
-
         </section>
 
         <section id="home-features " className="my-3 d-grid gap-3">
@@ -64,7 +76,6 @@ const Home: NextPage = () => {
             </div>
           </div>
 
-
           <div className="row justify-content-center">
             <div className="col-10 bg-primary rounded-3 bg-light p-4">
               <div className="">
@@ -73,14 +84,11 @@ const Home: NextPage = () => {
               </div>
             </div>
           </div>
-
         </section>
-
       </main>
 
-      <footer className="row justify-content-center">
-      </footer>
-    </div >
+      <footer className="row justify-content-center"></footer>
+    </div>
   );
 };
 
