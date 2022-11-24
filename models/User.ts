@@ -18,4 +18,5 @@ const UserSchema = new mongoose.Schema({
   elo: Number,
 });
 
-export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+export default mongoose.models.User ||
+  mongoose.model<IUser>("User", UserSchema);
