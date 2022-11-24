@@ -15,6 +15,7 @@ SENG 513 group project (codename guacamole)
    - I've also written a page that has a preview of what the chess board might look like: http://localhost:3000/match
 
 next-auth is working, but you must add your own secret for next-auth in a .env.local file. for example mine is:
+
 ```
 GITHUB_ID=<secret>
 GITHUB_SECRET=<secret>

@@ -2,7 +2,6 @@
 
 This microservice is intended to wrap the [stockfish engine](https://stockfishchess.org/) and allow it to be interactive over HTTP.
 
-
 ## Usage
 
 There are 2 ways to use the service:
@@ -55,15 +54,15 @@ You can test fen usage with the following script. You will need to install reque
 import requests
 
 port = 8228
-r = requests.post(f"http://localhost:{port}/fen", 
+r = requests.post(f"http://localhost:{port}/fen",
     json={ "fen":"6qk/8/5P1p/8/8/6QP/5PP1/4R1K1 w - - 0 1"}
 )
-r.json() """{'move': 'e1e8', 
+r.json() """{'move': 'e1e8',
             'top_3': [
               {'Centipawn': None, 'Mate': 2, 'Move': 'e1e8'},
               {'Centipawn': None, 'Mate': 3, 'Move': 'g3c7'},
               {'Centipawn': 6288, 'Mate': None, 'Move': 'g3g8'}
-            ], 
+            ],
             'wdl': [1000, 0, 0]}""
 ```
 
@@ -91,8 +90,6 @@ graph
     /fen --> Cascaydia
     Cascaydia --Make move, then wait for client--> Cascaydia
 ```
-
-
 
 ### Startup Process
 
@@ -147,5 +144,3 @@ graph
 ```
 
 Individual container startup would have an environment variable for each elo
-
-
