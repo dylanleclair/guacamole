@@ -9,13 +9,17 @@ Matchmaking algorithm brief:
 this is all done by messaging over websocket!
 
 */
+interface MatchFinderProps {
+    onFindMatch(): void,
+}
 
-
-export default function MatchFinder() {
+export default function MatchFinder(props: MatchFinderProps) {
     return (
         <div>
             <h1>Find a match</h1>
-            <button className="btn btn-primary">Find a game</button>
+
+
+            <button className="btn btn-primary" onClick={props.onFindMatch}>Find a game</button>
         </div>
     )
 }

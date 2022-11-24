@@ -34,20 +34,23 @@ export default async function handler(
       }
       break;
     case "POST":
+
       try {
         let chess = new Chess();
-        for (let i = 0; i < 20; i++) {
-          let index = randomInt(chess.moves().length);
-          chess.move(chess.moves()[index]);
-        }
-        console.log(chess.pgn());
+        // for (let i = 0; i < 20; i++) {
+        //   let index = randomInt(chess.moves().length);
+        //   chess.move(chess.moves()[index]);
+        // }
+        // console.log(chess.pgn());
+
+        console.log(req.body.playerid);
+
+
         // random chess game
         let m = await Match.create<IMatch>({
-          player1id: new ObjectId('6346e3c2eef101eb4eb8e65e'),
-          player2id: new ObjectId('635706046bc4c9602b6a8ffd'),
+          player1id: new ObjectId(req.body.playerid),
           pgn: chess.pgn(),
-          ongoing: true,
-
+          ongoing: false,
         });
 
         if (m) {
@@ -59,7 +62,6 @@ export default async function handler(
         res.status(400).json({ success: false });
       }
       break;
-
     case "PATCH":
       try {
 
