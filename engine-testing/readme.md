@@ -112,8 +112,6 @@ graph
 
 ## Todo
 
-- [ ] Error handling
-- [ ] Support alternative movement methods as required
 - [ ] Load balance the initial container with 3 replicas
   - [ ] Allow ability to set ELO from CLI and do seperated architecture for tiered bots
 
