@@ -141,6 +141,7 @@ const Home: NextPage = () => {
                         });
                     } else {
                         // what to do when no match could be fetched!
+                        setState({ ...state, user: user, perspective: 'white' });
 
                     }
                 })
@@ -150,9 +151,11 @@ const Home: NextPage = () => {
             isInitialLoad = false;
         }
 
-        // socket.on(WebsocketAction.MATCH_START, (match) => {
-
-        // })
+        socket.on(WebsocketAction.MATCH_START, (match) => {
+            // update the data like we do when first forming a connection !!!
+            // -> might want to move that stuff into a function tbh
+            console.log(match);
+        })
 
         // set socket move handler
         socket.on(WebsocketAction.MOVE_RECEIVED, (msg) => {
@@ -197,6 +200,7 @@ const Home: NextPage = () => {
             socket.off('connect');
             socket.off('disconnect');
             socket.off('move');
+            socket.off(WebsocketAction.MATCH_START)
         };
 
     }, [state]);
@@ -247,6 +251,11 @@ const Home: NextPage = () => {
             })
         }
     };
+
+    function onMatchRequest() {
+        console.log("requesting match", state.user)
+        socket.emit(WebsocketAction.MATCH_REQUEST, state.user);
+    }
 
     function surrender() {
         // we need to tell websocket player got rekt & wants to give up
@@ -299,7 +308,7 @@ const Home: NextPage = () => {
 
             {signin}
 
-            {state.matchId === "" && <MatchFinder />}
+            {state.matchId === "" && <MatchFinder onFindMatch={onMatchRequest} />}
 
             <main>
                 <div>Match: {state.matchId}</div>
