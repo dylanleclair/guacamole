@@ -3,7 +3,6 @@ import GithubProvider from "next-auth/providers/github";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import clientPromise from "../../../lib/mongoDb";
 
-
 export const authOptions = {
   // configure the auth providers
   providers: [
@@ -13,7 +12,7 @@ export const authOptions = {
     }),
   ],
   adapter: MongoDBAdapter(clientPromise),
-  debug: process.env.NODE_ENV === "development"
+  debug: process.env.NODE_ENV === "development",
 };
 
 export default NextAuth(authOptions);

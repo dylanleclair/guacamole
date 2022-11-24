@@ -3,8 +3,8 @@
 import os   # Used for path validation & platform confirmation
 
 # Third Party Dependencies
-from stockfish import Stockfish                     # Used to interface with stockfish binary
-from flask import Flask,Response, request, jsonify  # Provides methods for HTTP server implementation
+from stockfish import Stockfish, StockfishException                # Used to interface with stockfish binary
+from flask import Flask,Response, request, jsonify, make_response  # Provides methods for HTTP server implementation
 
 # Locate stockfish folder as absolute path relative to this python files' location
 stockfish_folder = os.path.join(
@@ -38,7 +38,12 @@ async def index() -> str:
     Str
         Some plain unstyled html with information for the user
     """
-    return "Hey there, send a JSON post request to /fen to get the best move<br><br>It should be in the format <br>  {<br>  'fen' : fen_position<br>}"
+    try:
+        return "Hey there, send a JSON post request to /fen to get the best move<br><br>It should be in the format <br>  {<br>  'fen' : fen_position<br>}"
+    except StockfishException: # Restart Stockfish
+        global stockfish
+        stockfish = Stockfish(path=stockfish_path, depth=18, parameters=parameters)
+        return make_response("SF Error, please retry", 500)
 
 @app.route("/fen", methods=["POST"])
 async def sendfen() -> Response:
@@ -70,15 +75,23 @@ async def sendfen() -> Response:
                 'wdl': [1000, 0, 0]}
     ```
     """
-    content = request.json["fen"]
-    stockfish.set_fen_position(content)
-    move = stockfish.get_best_move()
-    response = {
-        "move":move,
-        "top_3":stockfish.get_top_moves(3), # https://github.com/zhelyabuzhsky/stockfish#get-info-on-the-top-n-moves
-        "wdl":stockfish.get_wdl_stats() # https://github.com/zhelyabuzhsky/stockfish#get-stockfishs-windrawloss-stats-for-the-side-to-move-in-the-current-position
-    }
-    return jsonify(response)
+    global stockfish
+    try:
+        content = request.json["fen"]
+        if stockfish.is_fen_valid(content):
+            stockfish.set_fen_position(content)
+            move = stockfish.get_best_move()
+            response = {
+                "move":move,
+                "top_3":stockfish.get_top_moves(3), # https://github.com/zhelyabuzhsky/stockfish#get-info-on-the-top-n-moves
+                "wdl":stockfish.get_wdl_stats() # https://github.com/zhelyabuzhsky/stockfish#get-stockfishs-windrawloss-stats-for-the-side-to-move-in-the-current-position
+            }
+            return jsonify(response)
+        else:
+            return make_response("Invalid FEN", 400)
+    except StockfishException: # Restart Stockfish
+        stockfish = Stockfish(path=stockfish_path, depth=18, parameters=parameters)
+        return make_response("SF Error, please retry", 500)
 
 if __name__ == '__main__': # if app.py is run directly
     app.run(host="0.0.0.0", port=8228)
