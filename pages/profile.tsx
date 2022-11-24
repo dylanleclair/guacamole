@@ -47,6 +47,8 @@ const Profile: NextPage = () => {
             colorScheme={{ light: "white", dark: "#023020" }}
             selection={""}
             setSelection={() => {}}
+            perspective={"white"}
+            makeAmove={() => {}}
           />
         </div>
       </div>
