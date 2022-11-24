@@ -33,35 +33,37 @@ export default async function handler(
         res.status(400).json({});
       }
       break;
-    case "POST":
+    // DEPRECATED
+    // case "POST": 
 
-      try {
-        let chess = new Chess();
-        // for (let i = 0; i < 20; i++) {
-        //   let index = randomInt(chess.moves().length);
-        //   chess.move(chess.moves()[index]);
-        // }
-        // console.log(chess.pgn());
+    //   try {
+    //     let chess = new Chess();
+    //     for (let i = 0; i < 20; i++) {
+    //       let index = randomInt(chess.moves().length);
+    //       chess.move(chess.moves()[index]);
+    //     }
+    //     console.log(chess.pgn());
 
-        console.log(req.body.playerid);
+    //     console.log("PLAYERID: ", req.body);
 
+    //     console.log("MAKING A NEW MATCH!");
 
-        // random chess game
-        let m = await Match.create<IMatch>({
-          player1id: new ObjectId(req.body.playerid),
-          pgn: chess.pgn(),
-          ongoing: false,
-        });
+    //     // random chess game
+    //     let m = await Match.create<IMatch>({
+    //       player1id: new ObjectId(req.body),
+    //       pgn: chess.pgn(),
+    //       ongoing: false,
+    //     });
 
-        if (m) {
-          res.status(200).json(m);
-        }
+    //     if (m) {
+    //       res.status(200).json(m);
+    //     }
 
-      } catch (error) {
-        console.log(error);
-        res.status(400).json({ success: false });
-      }
-      break;
+    //   } catch (error) {
+    //     console.log(error);
+    //     res.status(400).json({ success: false });
+    //   }
+    //   break;
     case "PATCH":
       try {
 

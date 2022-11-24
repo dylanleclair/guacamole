@@ -1,34 +1,3 @@
-//     case "POST":
-
-// try {
-//     let chess = new Chess();
-//     // for (let i = 0; i < 20; i++) {
-//     //   let index = randomInt(chess.moves().length);
-//     //   chess.move(chess.moves()[index]);
-//     // }
-//     // console.log(chess.pgn());
-
-//     console.log(req.body.playerid);
-
-
-//     // random chess game
-//     let m = await Match.create<IMatch>({
-//         player1id: new ObjectId(req.body.playerid),
-//         pgn: chess.pgn(),
-//         ongoing: false,
-//     });
-
-//     if (m) {
-//         res.status(200).json(m);
-//     }
-
-// } catch (error) {
-//     console.log(error);
-//     res.status(400).json({ success: false });
-// }
-// break;
-
-
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import "../../../lib/databaseConnection";
@@ -72,13 +41,13 @@ export default async function handler(
             try {
                 let chess = new Chess();
 
-                console.log(chess.pgn());
-                console.log(req.body);
-
+                // console.log(chess.pgn());
+                console.log("USER ID", req.body);
+                console.log(JSON.parse(req.body));
 
                 // random chess game
                 let m = await Match.create<IMatch>({
-                    player1id: new ObjectId(req.body.playerid),
+                    player1id: new ObjectId(JSON.parse(req.body)),
                     pgn: "hi!",
                     ongoing: false,
                 });
@@ -117,16 +86,17 @@ export default async function handler(
 
                     console.log("found the pending match!");
                     console.log(m);
-                    await Match.where({ _id: matchId }).update({ player2id: userId }).exec().then(() => {
+                    await Match.where({ _id: matchId }).update({ player2id: userId, ongoing: true }).exec().then(() => {
 
                         console.log("match updated!")
-                        res.status(200).end();
                     }, () => {
                         throw new Error("The new player could not be added to the match!")
                     });
 
                     let updated = await Match.findOne<IMatch>({ _id: matchId }).exec();
                     console.log(updated);
+                    res.status(200).end();
+
 
                 } else {
                     throw new Error("Match could not be found in database.")

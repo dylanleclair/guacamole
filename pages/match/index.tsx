@@ -155,6 +155,39 @@ const Home: NextPage = () => {
             // update the data like we do when first forming a connection !!!
             // -> might want to move that stuff into a function tbh
             console.log(match);
+
+            fetch('/api/match/active').then((response) => {
+                if (response.ok) {
+
+                    let isPlayerWhite = true;
+
+                    response.json().then((data) => {
+                        let result = data as IMatch;
+
+
+                        if (state.user) {
+                            isPlayerWhite = (state.user._id === result.player1id) ? true : false;
+                        }
+
+
+
+                        let chess = new Chess();
+                        chess.loadPgn(result.pgn);
+
+                        console.log(chess.moves())
+
+                        setState({ ...state, board: chess, matchId: result._id, isPlayerWhite: isPlayerWhite, user: state.user, perspective: (isPlayerWhite) ? 'white' : 'black' });
+
+                        socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
+
+                    });
+                } else {
+                    // what to do when no match could be fetched!
+                    // setState({ ...state, user: user, perspective: 'white' });
+
+                }
+            })
+
         })
 
         // set socket move handler
