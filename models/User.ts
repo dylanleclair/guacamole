@@ -8,7 +8,10 @@ export interface IUser extends mongoose.Document {
   email: string;
   image: string;
   elo: number;
+  premiumMember: boolean;
   currentMatch?: Object;
+  boardLightColor?: string;
+  boardDarkColor?: string;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -16,6 +19,9 @@ const UserSchema = new mongoose.Schema({
   email: String,
   image: String,
   elo: Number,
+  premiumMember: Boolean,
+  boardLightColor: String,
+  boardDarkColor: String,
 });
 
 export default mongoose.models.User ||
