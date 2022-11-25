@@ -89,7 +89,7 @@ const Layout = (props: LayoutProps) => {
               </li>
 
               <li className="nav-item">
-                <a className="nav-link" href="#">
+                <a className="nav-link" href="/puzzles">
                   Puzzles
                 </a>
               </li>
