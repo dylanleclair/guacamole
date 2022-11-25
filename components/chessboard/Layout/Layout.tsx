@@ -26,12 +26,12 @@ const Layout = (props: LayoutProps) => {
   ) : (
     <ul className="dropdown-menu">
       <li>
-        <a className="dropdown-item" href="#" onClick={() => signIn()}>
+        <a className="dropdown-item" onClick={() => signIn()}>
           Sign Up
         </a>
       </li>
       <li>
-        <a className="dropdown-item" href="#" onClick={() => signIn()}>
+        <a className="dropdown-item" onClick={() => signIn()}>
           Sign In
         </a>
       </li>
@@ -42,7 +42,7 @@ const Layout = (props: LayoutProps) => {
     <div>
       <nav className="navbar fixed-top navbar-expand-lg bg-white">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">
+          <a className="navbar-brand" href="/">
             <img
               className="mt-1"
               src="/logo.svg"
@@ -76,7 +76,7 @@ const Layout = (props: LayoutProps) => {
                 </a>
                 <ul className="dropdown-menu">
                   <li>
-                    <a className="dropdown-item" href="#">
+                    <a className="dropdown-item" href="/match">
                       Human
                     </a>
                   </li>
