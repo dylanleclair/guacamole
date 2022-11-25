@@ -23,6 +23,7 @@
     "next": "12.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.39.5",
     "redux": "^4.2.0",
     "sass": "^1.56.0",
     "socket.io": "^4.5.3",
