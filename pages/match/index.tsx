@@ -38,7 +38,7 @@ interface MatchMetadata {
 /**
  * States of play. Used to decide what to render.
  */
-enum MATCH_STATES {
+export enum MATCH_STATES {
   MATCH_INIT,
   MATCH_NONE, // the user is not in a match and is not waiting for one
   MATCH_WAITING, // the user is not in a match but is waiting for one
@@ -122,7 +122,7 @@ const Home: NextPage = () => {
       } else {
         // what to do when no match could be fetched!
         // add user data to state
-        setState({ ...state, user: user });
+        setState({ ...state, user: user, match_state: MATCH_STATES.MATCH_NONE });
       }
     });
   }
@@ -276,6 +276,10 @@ const Home: NextPage = () => {
    * Sends a message to the server that indicates this user is requesting a match.
    */
   function onMatchRequest() {
+    setState({
+        ...state,
+        match_state: MATCH_STATES.MATCH_WAITING
+    })
     socket.emit(WebsocketAction.MATCH_REQUEST, state.user);
   }
 
@@ -324,7 +328,7 @@ const Home: NextPage = () => {
 
       {signin}
 
-      {state.matchId === "" && <MatchFinder onFindMatch={onMatchRequest} />}
+      {state.matchId === "" && <MatchFinder onFindMatch={onMatchRequest} match_state={state.match_state} />}
 
             <Modal show={state.match_state === MATCH_STATES.MATCH_END} onHide={handleClose}>
                 <Modal.Header closeButton>
