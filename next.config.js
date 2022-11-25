@@ -6,8 +6,9 @@ const nextConfig = {
   // except for webpack, other parts are left as generated
   webpack: (config, context) => {
     config.watchOptions = {
-      poll: 1000,
+      poll: 1500,
       aggregateTimeout: 300,
+      ignored: /node_modules/,
     };
     return config;
   },
