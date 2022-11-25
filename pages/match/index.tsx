@@ -253,6 +253,20 @@ const Home: NextPage = () => {
     }
   };
 
+
+  /**
+   * Select piece
+   */
+  function selectPiece (selection: string) {
+
+        if (state.match_state === MATCH_STATES.MATCH_PLAYING)
+        {
+            setState({
+            ...state,
+            selection: selection,
+            });
+        }
+    }
   /**
    * Sends the move the player wants to make to the server for processing.
    * @param moveToMake the Move (from chess.js) that the player wants to make
@@ -357,21 +371,13 @@ const Home: NextPage = () => {
             isPlayerWhite={state.isPlayerWhite}
             selection={state.selection}
             makeAmove={makeMove}
-            setSelection={(selection: string) => {
-              setState({
-                ...state,
-                selection: selection,
-              });
-            }}
+            setSelection={selectPiece}
           />
         )}
       </main>
 
       <input value={state.input} onChange={handleChange}></input>
       <button onClick={emit_message}>emit message</button>
-
-      <h2>Color</h2>
-      {/* <div>{state.color}</div> */}
 
       <h2>Moves</h2>
       <ol>{state.moves && moves_cmpnt}</ol>
