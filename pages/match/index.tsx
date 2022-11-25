@@ -20,6 +20,8 @@ import ChessUser, { IUser } from "../../models/User";
 import MatchFinder from "../../components/MatchFinder/MatchFinder";
 import { match } from "assert";
 
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 // Make the `request` function generic
 // to specify the return data type:
@@ -342,6 +344,10 @@ const Home: NextPage = () => {
 
     const moves_cmpnt = state.moves?.map((str, i) => <li key={i}>{str}</li>)
 
+    const handleClose = () => {
+        setState({...state, matchId: "", isMatchOver: false});
+    };
+
     return (
         <div className={styles.container}>
             <Head>
@@ -353,6 +359,21 @@ const Home: NextPage = () => {
             {signin}
 
             {state.matchId === "" && <MatchFinder onFindMatch={onMatchRequest} />}
+
+            <Modal show={state.isMatchOver} onHide={handleClose}>
+                <Modal.Header closeButton>
+                <Modal.Title>Match ended</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{state.matchData.winner} wins by {state.matchData.method}</Modal.Body>
+                <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                    Close
+                </Button>
+                <Button variant="primary" onClick={handleClose}>
+                    Save Changes
+                </Button>
+                </Modal.Footer>
+            </Modal>
 
             <main>
                 <div>Match: {state.matchId}</div>
@@ -400,7 +421,13 @@ const Home: NextPage = () => {
  */
 function GameOver(matchData: MatchMetadata) {
     return (
-        <h3>{matchData.winner} wins by {matchData.method}</h3>
+
+        <div>
+            <h3>{matchData.winner} wins by {matchData.method}</h3>
+            
+        </div>
+
+
     )
 }
 
