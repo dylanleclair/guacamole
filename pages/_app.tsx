@@ -1,21 +1,19 @@
 import { SessionProvider } from "next-auth/react";
-import "styles/global.scss"
+import "styles/global.scss";
 
 import type { AppProps } from "next/app";
 
 import Layout from "../components/chessboard/Layout/Layout";
 
 import { useEffect } from "react";
+import { UserInfoProvider } from "../context/UserInfo";
 
 // Use the <SessionProvider> to improve performance and allow components that call
 // `useSession()` anywhere in your application to access the `session` object.
 export default function App({ Component, pageProps }: AppProps) {
-
   useEffect(() => {
     require("bootstrap/dist/js/bootstrap.js");
   }, []);
-
-  // TODO: add fetch of user data here.
 
   return (
     <SessionProvider
@@ -23,12 +21,11 @@ export default function App({ Component, pageProps }: AppProps) {
       // you have a short session maxAge time. Shown here with default values.
       session={pageProps.session}
     >
-
-
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-
+      <UserInfoProvider>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </UserInfoProvider>
     </SessionProvider>
   );
 }

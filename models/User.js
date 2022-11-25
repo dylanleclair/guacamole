@@ -12,6 +12,9 @@ var UserSchema = new mongoose_1["default"].Schema({
   email: String,
   image: String,
   elo: Number,
+  premiumMember: Boolean,
+  boardLightColor: String,
+  boardDarkColor: String,
 });
 exports["default"] =
   mongoose_1["default"].models.User ||
