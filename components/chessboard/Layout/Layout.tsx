@@ -2,11 +2,12 @@ import { NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
+
 type LayoutProps = {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 };
 
-const Layout: NextPage = (props: LayoutProps) => {
+const Layout = (props: LayoutProps) => {
   const { data: session } = useSession();
 
   const signin = session ? (
