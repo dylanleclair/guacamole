@@ -37,6 +37,9 @@ interface PuzzleData {
     perspective: string;
 }
 
+// Loading in data of type Puzzle,
+// Fetch that, and package it up as that data type.
+// Reply with a random puzzle, and I will get it. 
 interface Puzzle {
     start_position: string;
     expected_line: string[];
@@ -229,6 +232,25 @@ const Home: NextPage = () => {
 
 
     // const moves_cmpnt = state.moves?.map((str, i) => <li key={i}>{str}</li>)
+
+    // Write a function that will post a get request to the puzzles end point.
+    // Return the puzzle
+
+    function getPuzzles() {
+        // Send http get request to localhost:3000/puzzles
+        // Parse as JSOn into a JS object
+        // Return the object I get
+
+        // Fetch from the page
+
+        //https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+        const puzzleFetch = fetch('http://localhost:3000/puzzles')
+        .then((response) => response.json())
+        .then((data) => data as Puzzle)
+
+        return puzzleFetch
+
+    }
 
     const handleClose = () => {
         setState({...state, puzzle_state: PUZZLE_STATES.PUZZLE_INIT});
