@@ -49,3 +49,4 @@ instance/
 .webassets-cache
 
 **/venv
+yarn.lock
