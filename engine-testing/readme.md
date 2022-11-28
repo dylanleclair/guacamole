@@ -70,10 +70,6 @@ r.json() """{'move': 'e1e8',
 
 Here are some additional notes that may be useful for people looking to work with the microserice
 
-### Vendored resources
-
-Due to an existing MacOS bug there is a vendored copy of [zhelyabuzhsky/stockfish](https://github.com/zhelyabuzhsky/stockfish) that has a custom patch applied in `/vendor/stockfish`.
-
 ### AI game flow
 
 Below are details for how communication happens with stockfish during AI games
