@@ -2,11 +2,12 @@ import { NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
+
 type LayoutProps = {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 };
 
-const Layout: NextPage = (props: LayoutProps) => {
+const Layout = (props: LayoutProps) => {
   const { data: session } = useSession();
 
   const signin = session ? (
@@ -25,12 +26,12 @@ const Layout: NextPage = (props: LayoutProps) => {
   ) : (
     <ul className="dropdown-menu">
       <li>
-        <a className="dropdown-item" href="#" onClick={() => signIn()}>
+        <a className="dropdown-item" onClick={() => signIn()}>
           Sign Up
         </a>
       </li>
       <li>
-        <a className="dropdown-item" href="#" onClick={() => signIn()}>
+        <a className="dropdown-item" onClick={() => signIn()}>
           Sign In
         </a>
       </li>
@@ -41,7 +42,7 @@ const Layout: NextPage = (props: LayoutProps) => {
     <div>
       <nav className="navbar fixed-top navbar-expand-lg bg-white">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">
+          <a className="navbar-brand" href="/">
             <img
               className="mt-1"
               src="/logo.svg"
@@ -75,7 +76,7 @@ const Layout: NextPage = (props: LayoutProps) => {
                 </a>
                 <ul className="dropdown-menu">
                   <li>
-                    <a className="dropdown-item" href="#">
+                    <a className="dropdown-item" href="/match">
                       Human
                     </a>
                   </li>
@@ -88,7 +89,7 @@ const Layout: NextPage = (props: LayoutProps) => {
               </li>
 
               <li className="nav-item">
-                <a className="nav-link" href="#">
+                <a className="nav-link" href="/puzzles">
                   Puzzles
                 </a>
               </li>

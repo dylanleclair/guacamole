@@ -8,7 +8,7 @@ import styles from "../../styles/Home.module.css";
 
 import { useSession, signIn, signOut } from "next-auth/react";
 import { IMatch } from "../../models/Match";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Chess, Move } from "chess.js";
 
 import ChessBoard from "../../components/chessboard/ChessBoard";
@@ -17,7 +17,12 @@ import SocketIO, { io, Socket } from "socket.io-client";
 import ChessUser, { IUser } from "../../models/User";
 import MatchFinder from "../../components/MatchFinder/MatchFinder";
 import { match } from "assert";
+
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+
 import { request } from "../../utils/networkingutils";
+import { UserInfoContext } from "../../context/UserInfo";
 
 const socket = SocketIO();
 
@@ -33,7 +38,8 @@ interface MatchMetadata {
 /**
  * States of play. Used to decide what to render.
  */
-enum MATCH_STATES {
+export enum MATCH_STATES {
+  MATCH_INIT,
   MATCH_NONE, // the user is not in a match and is not waiting for one
   MATCH_WAITING, // the user is not in a match but is waiting for one
   MATCH_PLAYING, // the user is in a match & is playing
@@ -48,9 +54,9 @@ interface PlayInteface {
   selection: string;
   isPlayerWhite: boolean;
   user: IUser | null;
-  isMatchOver: boolean;
   matchData: MatchMetadata;
   perspective: string;
+  match_state: MATCH_STATES;
 }
 
 const defaultProps = {
@@ -61,9 +67,9 @@ const defaultProps = {
   selection: "",
   isPlayerWhite: true,
   user: null,
-  isMatchOver: false,
   matchData: { winner: "", method: "" },
   perspective: "white",
+  match_state: MATCH_STATES.MATCH_INIT
 };
 
 let isInitialLoad = true;
@@ -71,6 +77,7 @@ let isInitialLoad = true;
 const Home: NextPage = () => {
   const { data: session } = useSession();
   const [state, setState] = useState<PlayInteface>(defaultProps);
+  const userInfo = useContext(UserInfoContext);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const old = { ...state };
@@ -82,6 +89,8 @@ const Home: NextPage = () => {
     fetch("/api/match/active").then((response) => {
       if (response.ok) {
         let isPlayerWhite = true;
+
+        console.log("GOT ACTIVE MATCH?");
 
         response.json().then((data) => {
           let result = data as IMatch; // interpret data from endpoint as a Match
@@ -105,6 +114,7 @@ const Home: NextPage = () => {
             isPlayerWhite: isPlayerWhite,
             user: user,
             perspective: isPlayerWhite ? "white" : "black",
+            match_state: MATCH_STATES.MATCH_PLAYING
           });
 
           socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
@@ -112,30 +122,24 @@ const Home: NextPage = () => {
       } else {
         // what to do when no match could be fetched!
         // add user data to state
-        setState({ ...state, user: user });
+        setState({ ...state, user: user, match_state: MATCH_STATES.MATCH_NONE });
       }
     });
   }
 
   useEffect(() => {
     // load the match id from the database
-    if (isInitialLoad) {
-      // get the user data from the user endpoint
-      request<IUser>("/api/user").then((result) => {
-        let user: IUser | null = null;
-        let isPlayerWhite = true;
-
-        if (result) {
-          user = result;
-          console.log("in match user is ", user);
+    if (state.match_state === MATCH_STATES.MATCH_INIT)
+    {
+        if (userInfo?.user)
+        {
+            fetchActiveMatch(userInfo.user);
         } else {
-          throw Error("User does not exist?");
+            setState({
+                ...state,
+                match_state: MATCH_STATES.MATCH_INIT
+            })
         }
-
-        fetchActiveMatch(user);
-      });
-
-      isInitialLoad = false;
     }
 
     /**
@@ -161,7 +165,7 @@ const Home: NextPage = () => {
 
           setState({
             ...state,
-            isMatchOver: true,
+            match_state: MATCH_STATES.MATCH_END,
             matchData: matchData,
           });
           return; // game is finished
@@ -194,7 +198,7 @@ const Home: NextPage = () => {
 
             setState({
               ...state,
-              isMatchOver: true,
+              match_state: MATCH_STATES.MATCH_END,
               matchData: matchData,
               board: s,
               moves: [...state.moves, msg],
@@ -249,6 +253,20 @@ const Home: NextPage = () => {
     }
   };
 
+
+  /**
+   * Select piece
+   */
+  function selectPiece (selection: string) {
+
+        if (state.match_state === MATCH_STATES.MATCH_PLAYING)
+        {
+            setState({
+            ...state,
+            selection: selection,
+            });
+        }
+    }
   /**
    * Sends the move the player wants to make to the server for processing.
    * @param moveToMake the Move (from chess.js) that the player wants to make
@@ -272,6 +290,10 @@ const Home: NextPage = () => {
    * Sends a message to the server that indicates this user is requesting a match.
    */
   function onMatchRequest() {
+    setState({
+        ...state,
+        match_state: MATCH_STATES.MATCH_WAITING
+    })
     socket.emit(WebsocketAction.MATCH_REQUEST, state.user);
   }
 
@@ -306,24 +328,41 @@ const Home: NextPage = () => {
 
   const moves_cmpnt = state.moves?.map((str, i) => <li key={i}>{str}</li>);
 
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    const handleClose = () => {
+        setState({...state, matchId: "", match_state: MATCH_STATES.MATCH_INIT});
+    };
+
+    return (
+        <div className={styles.container}>
+            <Head>
+                <title>Create Next App</title>
+                <meta name="description" content="Generated by create next app" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
 
       {signin}
 
-      {state.matchId === "" && <MatchFinder onFindMatch={onMatchRequest} />}
+      {state.matchId === "" && <MatchFinder onFindMatch={onMatchRequest} match_state={state.match_state} />}
 
-      <main>
-        <div>Match: {state.matchId}</div>
+            <Modal show={state.match_state === MATCH_STATES.MATCH_END} onHide={handleClose}>
+                <Modal.Header closeButton>
+                <Modal.Title>Match ended</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{state.matchData.winner} wins by {state.matchData.method}</Modal.Body>
+                <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                    Close
+                </Button>
+                <Button variant="primary" onClick={handleClose}>
+                    Save Changes
+                </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <main>
+                <div>Match: {state.matchId}</div>
 
         <div>Player color: {state.isPlayerWhite ? "white" : "black"}</div>
-
-        {state.isMatchOver && GameOver(state.matchData)}
 
         {state && (
           <ChessBoard
@@ -332,21 +371,13 @@ const Home: NextPage = () => {
             isPlayerWhite={state.isPlayerWhite}
             selection={state.selection}
             makeAmove={makeMove}
-            setSelection={(selection: string) => {
-              setState({
-                ...state,
-                selection: selection,
-              });
-            }}
+            setSelection={selectPiece}
           />
         )}
       </main>
 
       <input value={state.input} onChange={handleChange}></input>
       <button onClick={emit_message}>emit message</button>
-
-      <h2>Color</h2>
-      {/* <div>{state.color}</div> */}
 
       <h2>Moves</h2>
       <ol>{state.moves && moves_cmpnt}</ol>
@@ -357,17 +388,5 @@ const Home: NextPage = () => {
   );
 };
 
-/**
- * Displays the winner of the game and how they won
- * @param matchData
- * @returns a JSX h3 component telling the user who won & how.
- */
-function GameOver(matchData: MatchMetadata) {
-  return (
-    <h3>
-      {matchData.winner} wins by {matchData.method}
-    </h3>
-  );
-}
 
 export default Home;

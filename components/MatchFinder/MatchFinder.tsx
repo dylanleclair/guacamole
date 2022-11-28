@@ -1,3 +1,5 @@
+import { MATCH_STATES } from "../../pages/match";
+
 /*
 
 Matchmaking algorithm brief:
@@ -11,15 +13,19 @@ this is all done by messaging over websocket!
 */
 interface MatchFinderProps {
     onFindMatch(): void,
+    match_state: MATCH_STATES;
 }
 
 export default function MatchFinder(props: MatchFinderProps) {
+    
+    let findMatchButton = (props.match_state === MATCH_STATES.MATCH_WAITING) ? <p>Finding a match for you...</p> : <button className="btn btn-primary" onClick={props.onFindMatch}>Find a game</button>;
+    
     return (
         <div>
             <h1>Find a match</h1>
 
-
-            <button className="btn btn-primary" onClick={props.onFindMatch}>Find a game</button>
+            {findMatchButton}
+        
         </div>
     )
 }

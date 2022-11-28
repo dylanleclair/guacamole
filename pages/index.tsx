@@ -5,7 +5,7 @@ import styles from "../styles/Home.module.css";
 
 import ChessBoard from "../components/chessboard/ChessBoard";
 
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn, } from "next-auth/react";
 import { Chess } from "chess.js";
 import Link from "next/link";
 
@@ -43,12 +43,14 @@ const Home: NextPage = () => {
                 <button
                   className="btn btn-lg btn-primary text-white"
                   type="button"
+                  onClick={() => signIn()}
                 >
                   Login
                 </button>
                 <button
                   className="btn btn-lg btn-primary text-white"
                   type="button"
+                  onClick={() => signIn()}
                 >
                   Signup
                 </button>

@@ -412,7 +412,7 @@ export default function NewBoard(props: ChessBoardProps) {
       >
         {pieces && pieces}
         {possibleMoves && possibleMoves}
-        {Labels(props.perspective, light, dark)}
+        {Labels(props.perspective, dark, light)}
       </Background>
     </div>
   );
