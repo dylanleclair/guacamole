@@ -3,8 +3,12 @@
 import os   # Used for path validation & platform confirmation
 
 # Third Party Dependencies
-from stockfish import Stockfish, StockfishException                # Used to interface with stockfish binary
-from flask import Flask,Response, request, jsonify, make_response  # Provides methods for HTTP server implementation
+import chess                                              # Used to help interface with stockfish
+import chess.engine                                       # Used to actually interface with stockfish
+from flask import Flask,Response, request, make_response  # Provides methods for HTTP server implementation
+
+# Initialize flask app
+app = Flask(__name__)
 
 # Locate stockfish folder as absolute path relative to this python files' location
 stockfish_folder = os.path.join(
@@ -18,16 +22,7 @@ if os.name == "nt": # windows
 else: # linux
     stockfish_path = os.path.join(stockfish_folder, "stockfish")
 
-# Initialize flask app
-app = Flask(__name__)
-
-# Set configuration parameters, SEE: https://github.com/zhelyabuzhsky/stockfish#:~:text=can%20be%20modified.-,%7B%0A%20%20%20%20%22Debug%20Log%20File%22%3A%20%22%22%2C%0A%20%20%20%20%22Contempt%22%3A,%22UCI_LimitStrength%22%3A%20%22false%22%2C%0A%20%20%20%20%22UCI_Elo%22%3A%201350%0A%7D,-You%20can%20change
-parameters = {
-    "MultiPV": 3, # Output the N best lines, in this case 3 best lines
-}
-
-# Initialize stockfish engine NOTE: this is global state
-stockfish = Stockfish(path=stockfish_path, depth=18, parameters=parameters)
+engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 
 @app.route("/")
 async def index() -> str:
@@ -38,12 +33,7 @@ async def index() -> str:
     Str
         Some plain unstyled html with information for the user
     """
-    try:
-        return "Hey there, send a JSON post request to /fen to get the best move<br><br>It should be in the format <br>  {<br>  'fen' : fen_position<br>}"
-    except StockfishException: # Restart Stockfish
-        global stockfish
-        stockfish = Stockfish(path=stockfish_path, depth=18, parameters=parameters)
-        return make_response("SF Error, please retry", 500)
+    return "Hey there, send a JSON post request to /fen to get the best move<br><br>It should be in the format <br>  {<br>  'fen' : fen_position<br>}"
 
 @app.route("/fen", methods=["POST"])
 async def sendfen() -> Response:
@@ -75,23 +65,22 @@ async def sendfen() -> Response:
                 'wdl': [1000, 0, 0]}
     ```
     """
-    global stockfish
     try:
         content = request.json["fen"]
-        if stockfish.is_fen_valid(content):
-            stockfish.set_fen_position(content)
-            move = stockfish.get_best_move()
-            response = {
-                "move":move,
-                "top_3":stockfish.get_top_moves(3), # https://github.com/zhelyabuzhsky/stockfish#get-info-on-the-top-n-moves
-                "wdl":stockfish.get_wdl_stats() # https://github.com/zhelyabuzhsky/stockfish#get-stockfishs-windrawloss-stats-for-the-side-to-move-in-the-current-position
+        board = chess.Board(content)
+        if board.is_valid():
+            analysis = engine.analyse(board, chess.engine.Limit(time=0.1))
+            wdl = analysis["score"].relative.wdl()
+            resp = {
+                "move": str(analysis["pv"][0]),
+                "top_3": list(map(lambda x: str(x), analysis["pv"][0:3])),
+                "wdl": [wdl.wins, wdl.draws, wdl.losses]
             }
-            return jsonify(response)
+            return resp
         else:
             return make_response("Invalid FEN", 400)
-    except StockfishException: # Restart Stockfish
-        stockfish = Stockfish(path=stockfish_path, depth=18, parameters=parameters)
-        return make_response("SF Error, please retry", 500)
+    except ValueError:
+        return make_response("Invalid FEN", 400)
 
 if __name__ == '__main__': # if app.py is run directly
     app.run(host="0.0.0.0", port=8228)
