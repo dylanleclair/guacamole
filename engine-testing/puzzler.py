@@ -1,5 +1,7 @@
 import chess
 import chess.engine
+import requests
+
 from chess.engine import Mate
 
 engine = chess.engine.SimpleEngine.popen_uci("stockfish")
@@ -44,16 +46,15 @@ def make_puzzle():
 
                 # print(board.san(moves[0]))
                 # print(board.variation_san(info['pv']))
-                potential_puzzles.append({"start_position": board.fen(), "expected_line": line_in_san})
-
-                print('new puzzle generated!')
-                print('posting to database')
-                break
-        print(info['pv'][0])
+                return {"start_position": board.fen(), "expected_line": line_in_san}
+        # print(info['pv'][0])
         board.push(info['pv'][0])
-        
-for i in range(3):
-    make_puzzle()
+    return
+while True:
+    puzzle = make_puzzle()
+    print(puzzle)
+    if (puzzle is not None):
+        requests.post('http://localhost:3000/api/puzzles', data=puzzle)
 
 # All we need is FEN and moves to get going!!!
 

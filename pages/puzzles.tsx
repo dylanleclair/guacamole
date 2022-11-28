@@ -16,6 +16,7 @@ import MatchFinder from "../components/MatchFinder/MatchFinder";
 
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import Puzzle from "../models/Puzzle";
 
 /**
  * States of play. Used to decide what to render.
@@ -35,11 +36,6 @@ interface PuzzleData {
     puzzle_state: PUZZLE_STATES;
     puzzle_index: number;
     perspective: string;
-}
-
-interface Puzzle {
-    start_position: string;
-    expected_line: string[];
 }
 
 const defaultProps = {
@@ -64,7 +60,6 @@ function fetchPuzzle(): Puzzle {
     }
 
 }
-
 
 const Home: NextPage = () => {
     const { data: session } = useSession();
