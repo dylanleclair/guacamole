@@ -78,21 +78,30 @@ const Home: NextPage = () => {
         // load the match id from the database
         if (state.puzzle_state === PUZZLE_STATES.PUZZLE_INIT) {
 
-            let puzzle = fetchPuzzle();
 
-            let start_board = new Chess(puzzle.start_position);
-            let expected_line = puzzle.expected_line;
+            getPuzzle().then((puzzle) => {
 
-            start_board.move(expected_line[0]);
 
-            // get the user data from the user endpoint
-            setState({
-                ...state,
-                puzzle_state: PUZZLE_STATES.PUZZLE_SOLVING,
-                puzzle_index: 1,
-                board: start_board,
-                expected_line: fetchPuzzle().expected_line,
-                isPlayerWhite: start_board.turn() === 'w' ? true : false
+                console.log(puzzle);
+
+                console.log("parsing puzzle");
+                let start_board = new Chess(puzzle.start_position);
+                let expected_line = puzzle.expected_line;
+
+                start_board.move(expected_line[0]);
+
+                // get the user data from the user endpoint
+                setState({
+                    ...state,
+                    puzzle_state: PUZZLE_STATES.PUZZLE_SOLVING,
+                    puzzle_index: 1,
+                    board: start_board,
+                    expected_line: expected_line,
+                    isPlayerWhite: start_board.turn() === 'w' ? true : false
+                });
+
+
+
             });
 
         }
@@ -236,17 +245,18 @@ const Home: NextPage = () => {
     // Write a function that will post a get request to the puzzles end point.
     // Return the puzzle
 
-    function getPuzzles() {
+    async function getPuzzle() {
         // Send http get request to localhost:3000/puzzles
         // Parse as JSOn into a JS object
         // Return the object I get
 
         // Fetch from the page
 
+
         //https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-        const puzzleFetch = fetch('http://localhost:3000/puzzles')
-        .then((response) => response.json())
-        .then((data) => data as Puzzle)
+        const puzzleFetch = fetch('/api/puzzles')
+         .then((response) => response.json())
+         .then((data) => data as PuzzleInfo)
 
         return puzzleFetch
 

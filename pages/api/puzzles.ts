@@ -15,17 +15,17 @@ export default async function handler(
   switch (method) {
     case "GET":
       try {
-        const chess: Chess = new Chess();
-        let moveCount = 0;
-        console.log(chess.moves({ verbose: true })[0]);
-        while (moveCount < 30) {
-          const moves = chess.moves();
-          const move = moves[Math.floor(Math.random() * moves.length)];
-          chess.move(move);
-          moveCount += 1;
+
+        let p = await Puzzle.findOne<IPuzzle>();
+
+        if (p)
+        {
+            res.status(200).json(p);
+            
+        } else {
+            throw Error("Could not fetch any puzzles.");
         }
 
-        res.status(200).json({ player1id: null, pgn: chess.pgn() });
       } catch (error) {
         console.log(error);
         res.status(400).json({});
