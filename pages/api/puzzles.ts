@@ -16,15 +16,24 @@ export default async function handler(
     case "GET":
       try {
 
-        let p = await Puzzle.findOne<IPuzzle>();
 
-        if (p)
-        {
-            res.status(200).json(p);
-            
-        } else {
-            throw Error("Could not fetch any puzzles.");
-        }
+        Puzzle.count().exec(function(err, count){
+
+        var random = Math.floor(Math.random() * count);
+
+        Puzzle.findOne<IPuzzle>().skip(random).exec(
+            function (err, p) {
+
+            // result is random 
+            if (p)
+            {
+                res.status(200).json(p);
+
+            } else throw Error("Could not fetch any puzzles.");
+
+        });
+
+        });
 
       } catch (error) {
         console.log(error);
