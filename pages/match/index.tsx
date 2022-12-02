@@ -175,7 +175,9 @@ const Home: NextPage = () => {
 
         // otherwise make the move, and check if the game is over.
 
-        let s = new Chess(state.board.fen());
+        let s = new Chess();
+        s.loadPgn(state.board.pgn());
+
         let result = s.move(msg);
 
         if (result) {

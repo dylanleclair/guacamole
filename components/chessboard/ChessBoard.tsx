@@ -5,6 +5,7 @@ import { css } from "@emotion/react";
 import styles from "./chessboard.module.css";
 
 import React, { MouseEvent, useRef, useState } from "react";
+import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 
 interface Position {
   x: number;
@@ -148,6 +149,39 @@ function Piece(i: number, j: number, piece: string, color: string) {
       `}
     ></div>
   );
+}
+
+function MoveHint(i: number, j: number, color: string){
+    return (
+      <div
+        key={j * 8 + i}
+        className={styles.piece}
+        css={css`
+        transform: translate(${j * 100}%, ${i * 100}%);
+        background-color: ${color};
+      `}
+      ></div>
+    );
+}
+
+function lastMoveHints(board: Chess, perspective: string)
+{
+
+  let hints: EmotionJSX.Element[] = [];
+  // calculate the most recent move and render hints accordingly
+  let history = board.history({verbose:true}) as Move[];
+  console.log("HISTORY: ",history);
+  let lastMove = history.pop();
+  if (lastMove)
+  {
+    let indices = boardNotationToIndices(lastMove.from,perspective)
+    hints.push(MoveHint(indices.y, indices.x, `rgba(255,0,0,0.35)`));
+    indices = boardNotationToIndices(lastMove.to, perspective);
+
+    hints.push(MoveHint(indices.y, indices.x, `rgba(255,0,0,0.35)`));
+  }
+  return hints;
+
 }
 
 function Labels(perspective: string, light: string, dark: string) {
@@ -453,6 +487,7 @@ function PromotionModal(props: PromotionParams) {
         dark={dark}
         onClickHandler={handleClick}
       >
+        {lastMoveHints(props.board,props.perspective)}
         {isPromotion && <PromotionModal selection={props.selection} board={props.board} makeAmove={props.makeAmove}/>}
         {pieces && pieces}
         {possibleMoves && possibleMoves}

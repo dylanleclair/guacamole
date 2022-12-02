@@ -158,7 +158,8 @@ const Home: NextPage = () => {
                 return
             } 
 
-            let s = new Chess(state.board.fen());
+            let s = new Chess();
+            s.loadPgn(state.board.pgn());
             let result = s.move(state.expected_line[state.puzzle_index]);
 
             // make the next move in the puzzle
