@@ -120,7 +120,7 @@ function getPossibleMoves(
           <div
             className={styles.potentialMoves}
             css={css`
-              background-color: rgba(0, 0, 0, 1.0);
+              background-color: rgba(0, 0, 0, 0.4);
               border-radius: 50%;
             `}
           ></div>
