@@ -2,7 +2,6 @@ import { NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
-
 type LayoutProps = {
   children: React.ReactNode;
 };
@@ -42,15 +41,17 @@ const Layout = (props: LayoutProps) => {
     <div>
       <nav className="navbar fixed-top navbar-expand-lg bg-white">
         <div className="container-fluid">
-          <a className="navbar-brand" href="/">
-            <img
-              className="mt-1"
-              src="/logo.svg"
-              alt="Bootstrap"
-              height="40px"
-              width="auto"
-            />
-          </a>
+          <Link href="/" passHref>
+            <a className="navbar-brand">
+              <img
+                className="mt-1"
+                src="/logo.svg"
+                alt="Bootstrap"
+                height="40px"
+                width="auto"
+              />
+            </a>
+          </Link>
           <button
             className="navbar-toggler"
             type="button"
@@ -67,8 +68,8 @@ const Layout = (props: LayoutProps) => {
               <li className="nav-item dropdown">
                 <a
                   className="nav-link dropdown-toggle"
-                  href="#"
                   role="button"
+                  href="#"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
@@ -76,27 +77,27 @@ const Layout = (props: LayoutProps) => {
                 </a>
                 <ul className="dropdown-menu">
                   <li>
-                    <a className="dropdown-item" href="/match">
-                      Human
-                    </a>
+                    <Link href="/match" passHref>
+                      <a className="dropdown-item">Human</a>
+                    </Link>
                   </li>
                   <li>
-                    <a className="dropdown-item" href="#">
-                      Computer
-                    </a>
+                    <Link href="#" passHref>
+                      <a className="dropdown-item">Computer</a>
+                    </Link>
                   </li>
                 </ul>
               </li>
 
               <li className="nav-item">
-                <a className="nav-link" href="/puzzles">
-                  Puzzles
-                </a>
+                <Link href="/puzzles" passHref>
+                  <a className="nav-link">Puzzles</a>
+                </Link>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Analysis
-                </a>
+                <Link href="#" passHref>
+                  <a className="nav-link">Analysis</a>
+                </Link>
               </li>
 
               <li className="nav-item dropdown">
