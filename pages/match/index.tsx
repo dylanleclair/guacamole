@@ -26,10 +26,6 @@ import { UserInfoContext } from "../../context/UserInfo";
 
 const socket = SocketIO();
 
-socket.on("notif", (msg) => {
-  console.log(msg);
-});
-
 interface MatchMetadata {
   winner: string;
   method: string;
@@ -120,9 +116,14 @@ const Home: NextPage = () => {
           socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
         });
       } else {
+
         // what to do when no match could be fetched!
         // add user data to state
-        setState({ ...state, user: user, match_state: MATCH_STATES.MATCH_NONE });
+        setState({
+          ...state,
+          user: user,
+          match_state: MATCH_STATES.MATCH_NONE,
+        });
       }
     });
   }
@@ -148,11 +149,12 @@ const Home: NextPage = () => {
     socket.on(WebsocketAction.MATCH_START, (match) => {
       // update the data like we do when first forming a connection !!!
       // -> might want to move that stuff into a function tbh
+      console.log("GOT MATCH START!")
       fetchActiveMatch(state.user);
     });
 
     // set socket move handler
-    socket.on(WebsocketAction.MOVE_RECEIVED, (msg) => {
+    socket.on(WebsocketAction.MOVE_MADE, (msg) => {
       // the move has been validated by the server & updated server-side.
       // finally, we can update the board!
 
@@ -221,7 +223,7 @@ const Home: NextPage = () => {
     return () => {
       socket.off("connect");
       socket.off("disconnect");
-      socket.off("move");
+      socket.off(WebsocketAction.MOVE_MADE);
       socket.off(WebsocketAction.MATCH_START);
     };
   }, [state]);
@@ -246,7 +248,7 @@ const Home: NextPage = () => {
     // this makes sure that the move being sent to server is legal.
     // this is not really necessary, since the server will also validate before updating the match.
     if (result) {
-      socket.emit(WebsocketAction.MOVE, {
+      socket.emit(WebsocketAction.MAKE_MOVE, {
         game: state.matchId,
         move: state.input,
       });
@@ -279,7 +281,7 @@ const Home: NextPage = () => {
     // this is not really necessary, since the server will also validate before updating the match.
     if (result) {
       // send the move to the server in real-time
-      socket.emit(WebsocketAction.MOVE, {
+      socket.emit(WebsocketAction.MAKE_MOVE, {
         game: state.matchId,
         move: moveToMake.san,
       });
@@ -304,7 +306,7 @@ const Home: NextPage = () => {
   function surrender() {
     // we need to tell websocket player got rekt & wants to give up
     let playercolor = state.isPlayerWhite ? "white" : "black";
-    socket.emit(WebsocketAction.MOVE, {
+    socket.emit(WebsocketAction.MAKE_MOVE, {
       game: state.matchId,
       move: `${playercolor} resigns`,
     });
