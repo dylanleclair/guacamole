@@ -3,12 +3,12 @@ volumes:
   docker:
 
 services:
-  # engine:
-  #   build: ./engine-testing
-  #   restart: always
-  #   ports:
-  #     - 8228:8228
-  #   privileged: true
+  engine:
+    build: ./engine-testing
+    restart: always
+    ports:
+      - 8228:8228
+    privileged: true
 
   mongo:
     image: mongo
