@@ -4,7 +4,7 @@ import { css } from "@emotion/react";
 
 import styles from "./chessboard.module.css";
 
-import React, { MouseEvent, useRef } from "react";
+import React, { MouseEvent, useRef, useState } from "react";
 
 interface Position {
   x: number;
@@ -80,7 +80,29 @@ function boardNotationToIndices(pos: string, perspective: string) {
   return { x: x, y: y };
 }
 
+let PROMOTION_OPTIONS = ["Q", "R", "B", "N"];
+
 /** Calculates the possible moves for the selected piece, returning an SVG rendering them all as an overlay on the board. */
+
+function PromotionPiece(i: number, move: Move, onClick: (move: Move) => void) {
+  
+  if (move.promotion){
+    let piece = move.promotion;
+    let color = move.color;
+    return (
+      <img
+        key={i}
+        className={styles.promotionOption}
+        src={piece_url(piece, color)}
+        onClick={() => {
+          console.log("PROMOTION SELECTED");
+          onClick(move);
+        }}
+      ></img>
+    );
+  }
+
+}
 
 function getPossibleMoves(
   selection: string,
@@ -89,32 +111,48 @@ function getPossibleMoves(
 ) {
   let moves = position.moves({ verbose: true }) as Move[];
 
+
+  let color = position.turn();
+  console.log(color);
+
+
+
   console.log("SEL", selection);
+  
+  let potentialMoves = moves.filter((move) => move.from === selection);
+  console.log(potentialMoves);
+
+  // let isPromotion = potentialMoves.some((x) => {
+  //   return x.san.includes("=");
+  // });
+
+  //   if (isPromotion) {
+  //     let pieces = PROMOTION_OPTIONS.map((x, i) => {
+  //       return PromotionPiece(i, x, color === "w" ? "w" : "b");
+  //     });
+  //     let pos = boardNotationToIndices("a8", perspective);
+  //     // render the promotion menu.
+  //     // this is just four pieces.
+  //     return (
+  //       <div
+  //         key={1000}
+  //         className={styles.piecePromotion}
+  //         css={css`
+  //           transform: translate(${pos.x * 100}%, ${pos.y * 100}%);
+  //         `}
+  //       >
+  //         {pieces}
+  //       </div>
+  //     );
+  //   }
+
+  // console.log("IS PROMOTION: ", isPromotion);
+
   let movesDrawn = moves
     .filter((move) => move.from === selection)
     .map((move) => {
       let pos = boardNotationToIndices(move.to, perspective);
       console.log("POS", pos);
-
-      if (perspective === "black") {
-        return (
-          <div
-            key={pos.x * 8 + pos.y}
-            className={styles.piece}
-            css={css`
-              transform: translate(${pos.x * 100}%, ${pos.y * 100}%);
-            `}
-          >
-            <div
-              className={styles.potentialMoves}
-              css={css`
-                background-color: rgba(0, 0, 0, 0.5);
-                border-radius: 50%;
-              `}
-            ></div>
-          </div>
-        );
-      }
 
       return (
         <div
@@ -127,7 +165,7 @@ function getPossibleMoves(
           <div
             className={styles.potentialMoves}
             css={css`
-              background-color: rgba(0, 0, 0, 0.5);
+              background-color: rgba(0, 0, 0, 1.0);
               border-radius: 50%;
             `}
           ></div>
@@ -295,6 +333,7 @@ function getMousePos(
 }
 
 function mouseDown(event: MouseEvent) {
+  // we want to move the piece with the cursor
   console.log("pos: " + event.clientX + " " + event.clientY);
 }
 
@@ -302,11 +341,19 @@ function mouseMove(event: MouseEvent) {}
 
 function mouseUp(event: MouseEvent) {}
 
+interface PromotionParams {
+  board: Chess;
+  selection: string;
+  makeAmove(move: Move): void;
+}
+
+
 export default function NewBoard(props: ChessBoardProps) {
   const light = props.colorScheme?.light ?? "white";
   const dark = props.colorScheme?.dark ?? "#fca311";
 
   const boardRef = useRef<HTMLDivElement>(null);
+  const [isPromotion, setIsPromotion] = useState<boolean>(false);
 
   let possibleMoves = getPossibleMoves(
     props.selection,
@@ -335,9 +382,50 @@ export default function NewBoard(props: ChessBoardProps) {
     }
   }
 
+
+
+function PromotionModal(props: PromotionParams) {
+  let allMoves = props.board.moves({ verbose: true }) as Move[];
+
+  console.log(
+    allMoves.filter((x) => {
+      return x.san.includes("=");
+    })
+  );
+
+  const makeMove = (move: Move) => {
+    props.makeAmove(move);
+    setIsPromotion(false)
+  };
+
+  let pieces = allMoves
+    .filter((x) => {
+      return x.san.includes("=");
+    })
+    .map((x, i) => PromotionPiece(i, x, makeMove));
+
+  // let pieces = PROMOTION_OPTIONS.map((x, i) => {
+  //   return PromotionPiece(i, x, props.color === "w" ? "w" : "b");
+  // });
+
+  return (
+    <div className={styles.promotionModalContainer}>
+      <div
+        className={`${styles.promotionModal} d-flex flex-col justify-content-center align-items-center container`}
+      >
+        <h1>Choose a piece to promote to!</h1>
+        <div className="d-flex">{pieces}</div>
+      </div>
+    </div>
+  );
+}
+
   const handleClick = (e: React.MouseEvent) => {
     // this should be refactored /combined with other methods to support dragging a piece to the target location
     // setSelection / makeMove will be passed in as props
+
+    if (isPromotion)
+    return;
 
     const r = windowToBoardCoords(boardRef.current!, {
       x: e?.clientX,
@@ -356,10 +444,8 @@ export default function NewBoard(props: ChessBoardProps) {
     console.log(`Recalculated, converted to index: ${indices.i},${indices.j}`);
 
     /* PROCESS THE MOVE */
-    const chess = props.board; // this is only ever the original board ???
-    // const board = chess.board();
+    const chess = props.board;
     const board = gameBoard;
-    // TODO make the move, if it's a legal move (AND RETURN!)
 
     let boardNotation = convertIndicesToBoardNotation(
       indices,
@@ -373,11 +459,20 @@ export default function NewBoard(props: ChessBoardProps) {
         availableMoves[i].from === props.selection &&
         availableMoves[i].to === boardNotation
       ) {
-        // make the move
-        props.makeAmove(availableMoves[i]);
+
+        if (availableMoves[i].san.includes("="))
+        {
+          setIsPromotion(true);
+        } else {
+          // make the move
+          props.makeAmove(availableMoves[i]);
+        }
+
         return;
       }
     }
+
+    
 
     const color = props.isPlayerWhite ? "w" : "b";
 
@@ -410,6 +505,7 @@ export default function NewBoard(props: ChessBoardProps) {
         dark={dark}
         onClickHandler={handleClick}
       >
+        {isPromotion && <PromotionModal selection={props.selection} board={props.board} makeAmove={props.makeAmove}/>}
         {pieces && pieces}
         {possibleMoves && possibleMoves}
         {Labels(props.perspective, dark, light)}

@@ -10,6 +10,45 @@
     top: 0;
 }
 
+.piecePromotion {
+    height: 50%;
+    width: calc(100% / 8);
+    position: absolute;
+    top: 0;
+    background-color: white;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.promotionModal {
+    background-color: white;
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.promotionModalContainer {
+    position: absolute;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.521);
+    width:100%;
+    height:100%;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.promotionOptions {
+
+}
+.promotionOption {
+    width: clamp(40px, 15vw, 200px);
+    height: auto;
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
 .container {
     position: relative;
     width: 100%;
