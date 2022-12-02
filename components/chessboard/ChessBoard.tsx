@@ -333,6 +333,7 @@ export default function NewBoard(props: ChessBoardProps) {
 
   const boardRef = useRef<HTMLDivElement>(null);
   const [isPromotion, setIsPromotion] = useState<boolean>(false);
+  const [promotionSquare, setPromotionSquare] = useState<string>("");
 
   let possibleMoves = getPossibleMoves(
     props.selection,
@@ -369,11 +370,12 @@ function PromotionModal(props: PromotionParams) {
   const makeMove = (move: Move) => {
     props.makeAmove(move);
     setIsPromotion(false)
+    setPromotionSquare("");
   };
 
   let pieces = allMoves
     .filter((x) => {
-      return x.san.includes("=");
+      return x.san.includes("=") && x.to === promotionSquare;
     })
     .map((x, i) => PromotionPiece(i, x, makeMove));
 
@@ -436,6 +438,7 @@ function PromotionModal(props: PromotionParams) {
         if (availableMoves[i].san.includes("="))
         {
           setIsPromotion(true);
+          setPromotionSquare(availableMoves[i].to);
         } else {
           // make the move
           props.makeAmove(availableMoves[i]);
