@@ -9,7 +9,7 @@ function createSocketHandler(server) {
             console.log("client disconnected");
         }
         console.log("websocket client connected");
-        io.on('disconnect', disconnect);
+        io.on("disconnect", disconnect);
         io.on("match_connect", function (msg) {
             // handle the event!
             // in this case, see if both players have joined.
@@ -21,7 +21,10 @@ function createSocketHandler(server) {
             // io.to(msg.game).emit("move", msg.move);
             // load the database
             // we want to post the move to the database / next API
-            fetch(PROXY + "api/match/", { method: "PATCH", body: JSON.stringify(msg) }).then(function (res) {
+            fetch(PROXY + "api/match/", {
+                method: "PATCH",
+                body: JSON.stringify(msg)
+            }).then(function (res) {
                 if (res.ok) {
                     // if move was successful, send it to all players in the game.
                     server["in"](msg.game).emit("move", msg.move);
@@ -42,23 +45,34 @@ function createSocketHandler(server) {
             // basically: check pending matches
             // if there are any (suitable) matches open, the match document will be returned!
             fetch(PROXY + "api/match/pending", { method: "GET" }).then(function (res) {
+                // TODO body to help decide which match
                 if (res.ok) {
                     // a suitable match was found and returned!
                     res.json().then(function (matchdata) {
                         // tell api to add second user to the game
-                        fetch(PROXY + "api/match/pending", { method: "PATCH", body: JSON.stringify({ match: matchdata._id, userId: userdata._id }) }).then(function (inner) {
+                        fetch(PROXY + "api/match/pending", {
+                            method: "PATCH",
+                            body: JSON.stringify({
+                                match: matchdata._id,
+                                userId: userdata._id
+                            })
+                        }).then(function (inner) {
                             if (inner.ok) {
                                 // if this goes smoothly (it should!!!)
                                 io.join(matchdata._id); // join the room
                                 // tell all players in that match that the game has started (so they can start to play!)
-                                server.sockets["in"](matchdata._id).emit(emit_messages_1.WebsocketAction.MATCH_START, "HELLO!"); // tell room (both players) to start game
+                                server.sockets["in"](matchdata._id)
+                                    .emit(emit_messages_1.WebsocketAction.MATCH_START, "HELLO!"); // tell room (both players) to start game
                             }
                         });
                     });
                 }
                 else {
                     // player must wait for someone else to request a match
-                    fetch(PROXY + "api/match/pending", { method: "POST", body: JSON.stringify(userdata._id) }).then(function (inner) {
+                    fetch(PROXY + "api/match/pending", {
+                        method: "POST",
+                        body: JSON.stringify(userdata._id)
+                    }).then(function (inner) {
                         // should get the match id in response
                         if (inner.ok) {
                             // if the response is okay, then send the user the match id to wait / listen to

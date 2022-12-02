@@ -4,7 +4,8 @@ import { css } from "@emotion/react";
 
 import styles from "./chessboard.module.css";
 
-import React, { MouseEvent, useRef } from "react";
+import React, { MouseEvent, useRef, useState } from "react";
+import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
 
 interface Position {
   x: number;
@@ -34,14 +35,12 @@ function convertIndicesToBoardNotation(
   pos: { i: number; j: number },
   perspective: string
 ) {
-  console.log("coords: ", pos);
   let result: string = `${FILES[pos.i]}${8 - pos.j}`;
 
   if (perspective === "black") {
     result = `${FILES[7 - pos.i]}${pos.j + 1}`;
   }
 
-  console.log("BOARD NOTATION: ", result);
   return result;
 }
 
@@ -60,8 +59,6 @@ function boardNotationToIndices(pos: string, perspective: string) {
   // (h1) -> index 0
   // (h8) -> index 7
 
-  console.log("converting board notation to indices");
-  console.log("POS: ", pos);
 
   let x = 0;
   for (let i = 0; i < FILES.length; i++) {
@@ -82,6 +79,25 @@ function boardNotationToIndices(pos: string, perspective: string) {
 
 /** Calculates the possible moves for the selected piece, returning an SVG rendering them all as an overlay on the board. */
 
+function PromotionPiece(i: number, move: Move, onClick: (move: Move) => void) {
+  
+  if (move.promotion){
+    let piece = move.promotion;
+    let color = move.color;
+    return (
+      <img
+        key={i}
+        className={styles.promotionOption}
+        src={piece_url(piece, color)}
+        onClick={() => {
+          onClick(move);
+        }}
+      ></img>
+    );
+  }
+
+}
+
 function getPossibleMoves(
   selection: string,
   position: Chess,
@@ -89,32 +105,10 @@ function getPossibleMoves(
 ) {
   let moves = position.moves({ verbose: true }) as Move[];
 
-  console.log("SEL", selection);
   let movesDrawn = moves
     .filter((move) => move.from === selection)
     .map((move) => {
       let pos = boardNotationToIndices(move.to, perspective);
-      console.log("POS", pos);
-
-      if (perspective === "black") {
-        return (
-          <div
-            key={pos.x * 8 + pos.y}
-            className={styles.piece}
-            css={css`
-              transform: translate(${pos.x * 100}%, ${pos.y * 100}%);
-            `}
-          >
-            <div
-              className={styles.potentialMoves}
-              css={css`
-                background-color: rgba(0, 0, 0, 0.5);
-                border-radius: 50%;
-              `}
-            ></div>
-          </div>
-        );
-      }
 
       return (
         <div
@@ -127,7 +121,7 @@ function getPossibleMoves(
           <div
             className={styles.potentialMoves}
             css={css`
-              background-color: rgba(0, 0, 0, 0.5);
+              background-color: rgba(0, 0, 0, 0.4);
               border-radius: 50%;
             `}
           ></div>
@@ -157,8 +151,31 @@ function Piece(i: number, j: number, piece: string, color: string) {
   );
 }
 
+function MoveHint(i: number, j: number, color: string) {
+  return (
+    <rect x={j * 100} y={i * 100} width="100" height="100" fill={color}></rect>
+  );
+}
+
+function LastMoveHints(board: Chess, perspective: string) {
+  let hints: EmotionJSX.Element[] = [];
+  // calculate the most recent move and render hints accordingly
+  let history = board.history({ verbose: true }) as Move[];
+  console.log("HISTORY: ", history);
+  let lastMove = history.pop();
+  if (lastMove) {
+    let indices = boardNotationToIndices(lastMove.from, perspective);
+    hints.push(MoveHint(indices.y, indices.x, `rgba(255,0,0,0.6)`));
+    indices = boardNotationToIndices(lastMove.to, perspective);
+
+    hints.push(MoveHint(indices.y, indices.x, `rgba(255,0,0,0.6)`));
+  }
+  return hints;
+}
+
+
+
 function Labels(perspective: string, light: string, dark: string) {
-  console.log(perspective);
   if (perspective === "black") {
     return (
       <div className={styles.labels}>
@@ -295,18 +312,27 @@ function getMousePos(
 }
 
 function mouseDown(event: MouseEvent) {
-  console.log("pos: " + event.clientX + " " + event.clientY);
+  // we want to move the piece with the cursor
+  // console.log("pos: " + event.clientX + " " + event.clientY);
 }
 
 function mouseMove(event: MouseEvent) {}
 
 function mouseUp(event: MouseEvent) {}
 
+interface PromotionParams {
+  board: Chess;
+  selection: string;
+  makeAmove(move: Move): void;
+}
+
+
 export default function NewBoard(props: ChessBoardProps) {
   const light = props.colorScheme?.light ?? "white";
   const dark = props.colorScheme?.dark ?? "#fca311";
 
   const boardRef = useRef<HTMLDivElement>(null);
+  const [isPromotion, setIsPromotion] = useState<boolean>(false);
 
   let possibleMoves = getPossibleMoves(
     props.selection,
@@ -335,9 +361,44 @@ export default function NewBoard(props: ChessBoardProps) {
     }
   }
 
+
+
+function PromotionModal(props: PromotionParams) {
+  let allMoves = props.board.moves({ verbose: true }) as Move[];
+
+  const makeMove = (move: Move) => {
+    props.makeAmove(move);
+    setIsPromotion(false)
+  };
+
+  let pieces = allMoves
+    .filter((x) => {
+      return x.san.includes("=");
+    })
+    .map((x, i) => PromotionPiece(i, x, makeMove));
+
+  // let pieces = PROMOTION_OPTIONS.map((x, i) => {
+  //   return PromotionPiece(i, x, props.color === "w" ? "w" : "b");
+  // });
+
+  return (
+    <div className={styles.promotionModalContainer}>
+      <div
+        className={`${styles.promotionModal} d-flex flex-col justify-content-center align-items-center container`}
+      >
+        <h1>Choose a piece to promote to!</h1>
+        <div className="d-flex">{pieces}</div>
+      </div>
+    </div>
+  );
+}
+
   const handleClick = (e: React.MouseEvent) => {
     // this should be refactored /combined with other methods to support dragging a piece to the target location
     // setSelection / makeMove will be passed in as props
+
+    if (isPromotion)
+    return;
 
     const r = windowToBoardCoords(boardRef.current!, {
       x: e?.clientX,
@@ -353,13 +414,11 @@ export default function NewBoard(props: ChessBoardProps) {
       i: Math.floor(r.x / cellSize),
       j: Math.floor(r.y / cellSize),
     };
-    console.log(`Recalculated, converted to index: ${indices.i},${indices.j}`);
+    // console.log(`Recalculated, converted to index: ${indices.i},${indices.j}`);
 
     /* PROCESS THE MOVE */
-    const chess = props.board; // this is only ever the original board ???
-    // const board = chess.board();
+    const chess = props.board;
     const board = gameBoard;
-    // TODO make the move, if it's a legal move (AND RETURN!)
 
     let boardNotation = convertIndicesToBoardNotation(
       indices,
@@ -368,16 +427,25 @@ export default function NewBoard(props: ChessBoardProps) {
     let availableMoves: Move[] = chess.moves({ verbose: true }) as Move[];
     for (let i = 0; i < availableMoves.length; i++) {
       // iterate over all the moves & see if the current selection -> target square is a move
-      console.log(props.selection);
+      // console.log(props.selection);
       if (
         availableMoves[i].from === props.selection &&
         availableMoves[i].to === boardNotation
       ) {
-        // make the move
-        props.makeAmove(availableMoves[i]);
+
+        if (availableMoves[i].san.includes("="))
+        {
+          setIsPromotion(true);
+        } else {
+          // make the move
+          props.makeAmove(availableMoves[i]);
+        }
+
         return;
       }
     }
+
+    
 
     const color = props.isPlayerWhite ? "w" : "b";
 
@@ -389,13 +457,13 @@ export default function NewBoard(props: ChessBoardProps) {
       board[indices.j][indices.i]?.color !== color
     ) {
       // set selection
-      console.log("no selection");
-      console.log(board[indices.j][indices.i] === null);
-      console.log(convertIndicesToBoardNotation(indices, props.perspective));
+      // console.log("no selection");
+      // console.log(board[indices.j][indices.i] === null);
+      // console.log(convertIndicesToBoardNotation(indices, props.perspective));
       props.setSelection("");
     } else {
       // set selection
-      console.log("new selection!");
+      // console.log("new selection!");
       props.setSelection(
         convertIndicesToBoardNotation(indices, props.perspective)
       );
@@ -409,7 +477,10 @@ export default function NewBoard(props: ChessBoardProps) {
         light={light}
         dark={dark}
         onClickHandler={handleClick}
+        board={props.board}
+        perspective={props.perspective}
       >
+        {isPromotion && <PromotionModal selection={props.selection} board={props.board} makeAmove={props.makeAmove}/>}
         {pieces && pieces}
         {possibleMoves && possibleMoves}
         {Labels(props.perspective, dark, light)}
@@ -424,17 +495,15 @@ interface BoardColor {
   children?: React.ReactNode;
   refToPass: React.RefObject<HTMLDivElement>;
   onClickHandler(event: React.MouseEvent): void;
+  board: Chess;
+  perspective: string;
 }
 
 function Background(props: BoardColor) {
   const light = props.light;
   const dark = props.dark;
 
-  function sampleOnClick() {
-    console.log("sheeeeee");
-  }
-
-  console.log("RENDERING BACKGROUND!");
+  // console.log("RENDERING BACKGROUND!");
 
   return (
     <div ref={props.refToPass} onClick={props.onClickHandler}>
@@ -503,6 +572,7 @@ function Background(props: BoardColor) {
           <rect x="500" y="600" width="100" height="100" fill={`${dark}`} />
           <rect x="600" y="600" width="100" height="100" fill={`${light}`} />
           <rect x="700" y="600" width="100" height="100" fill={`${dark}`} />
+          {LastMoveHints(props.board, props.perspective)}
         </g>
         <defs>
           <clipPath id="clip0_37_2">
