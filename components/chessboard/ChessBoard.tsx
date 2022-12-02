@@ -151,38 +151,29 @@ function Piece(i: number, j: number, piece: string, color: string) {
   );
 }
 
-function MoveHint(i: number, j: number, color: string){
-    return (
-      <div
-        key={j * 8 + i}
-        className={styles.piece}
-        css={css`
-        transform: translate(${j * 100}%, ${i * 100}%);
-        background-color: ${color};
-      `}
-      ></div>
-    );
+function MoveHint(i: number, j: number, color: string) {
+  return (
+    <rect x={j * 100} y={i * 100} width="100" height="100" fill={color}></rect>
+  );
 }
 
-function lastMoveHints(board: Chess, perspective: string)
-{
-
+function LastMoveHints(board: Chess, perspective: string) {
   let hints: EmotionJSX.Element[] = [];
   // calculate the most recent move and render hints accordingly
-  let history = board.history({verbose:true}) as Move[];
-  console.log("HISTORY: ",history);
+  let history = board.history({ verbose: true }) as Move[];
+  console.log("HISTORY: ", history);
   let lastMove = history.pop();
-  if (lastMove)
-  {
-    let indices = boardNotationToIndices(lastMove.from,perspective)
-    hints.push(MoveHint(indices.y, indices.x, `rgba(255,0,0,0.35)`));
+  if (lastMove) {
+    let indices = boardNotationToIndices(lastMove.from, perspective);
+    hints.push(MoveHint(indices.y, indices.x, `rgba(255,0,0,0.6)`));
     indices = boardNotationToIndices(lastMove.to, perspective);
 
-    hints.push(MoveHint(indices.y, indices.x, `rgba(255,0,0,0.35)`));
+    hints.push(MoveHint(indices.y, indices.x, `rgba(255,0,0,0.6)`));
   }
   return hints;
-
 }
+
+
 
 function Labels(perspective: string, light: string, dark: string) {
   if (perspective === "black") {
@@ -486,8 +477,9 @@ function PromotionModal(props: PromotionParams) {
         light={light}
         dark={dark}
         onClickHandler={handleClick}
+        board={props.board}
+        perspective={props.perspective}
       >
-        {lastMoveHints(props.board,props.perspective)}
         {isPromotion && <PromotionModal selection={props.selection} board={props.board} makeAmove={props.makeAmove}/>}
         {pieces && pieces}
         {possibleMoves && possibleMoves}
@@ -503,6 +495,8 @@ interface BoardColor {
   children?: React.ReactNode;
   refToPass: React.RefObject<HTMLDivElement>;
   onClickHandler(event: React.MouseEvent): void;
+  board: Chess;
+  perspective: string;
 }
 
 function Background(props: BoardColor) {
@@ -578,6 +572,7 @@ function Background(props: BoardColor) {
           <rect x="500" y="600" width="100" height="100" fill={`${dark}`} />
           <rect x="600" y="600" width="100" height="100" fill={`${light}`} />
           <rect x="700" y="600" width="100" height="100" fill={`${dark}`} />
+          {LastMoveHints(props.board, props.perspective)}
         </g>
         <defs>
           <clipPath id="clip0_37_2">
