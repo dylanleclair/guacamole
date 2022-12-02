@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { Session, User } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import clientPromise from "../../../lib/mongoDb";
@@ -13,6 +13,18 @@ export const authOptions = {
   ],
   adapter: MongoDBAdapter(clientPromise),
   debug: process.env.NODE_ENV === "development",
+  callbacks: {
+    async session({ session, user }: { session: Session; user: User }) {
+      session = {
+        ...session,
+        user: {
+          id: user.id,
+          ...session.user,
+        },
+      };
+      return session;
+    },
+  },
 };
 
 export default NextAuth(authOptions);

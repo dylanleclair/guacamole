@@ -7,8 +7,8 @@ export interface IUser extends mongoose.Document {
   name: string;
   email: string;
   image: string;
-  elo: number;
-  premiumMember: boolean;
+  elo?: number;
+  premiumMember?: boolean;
   currentMatch?: Object;
   boardLightColor?: string;
   boardDarkColor?: string;
