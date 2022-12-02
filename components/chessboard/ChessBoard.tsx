@@ -34,14 +34,12 @@ function convertIndicesToBoardNotation(
   pos: { i: number; j: number },
   perspective: string
 ) {
-  console.log("coords: ", pos);
   let result: string = `${FILES[pos.i]}${8 - pos.j}`;
 
   if (perspective === "black") {
     result = `${FILES[7 - pos.i]}${pos.j + 1}`;
   }
 
-  console.log("BOARD NOTATION: ", result);
   return result;
 }
 
@@ -60,8 +58,6 @@ function boardNotationToIndices(pos: string, perspective: string) {
   // (h1) -> index 0
   // (h8) -> index 7
 
-  console.log("converting board notation to indices");
-  console.log("POS: ", pos);
 
   let x = 0;
   for (let i = 0; i < FILES.length; i++) {
@@ -80,8 +76,6 @@ function boardNotationToIndices(pos: string, perspective: string) {
   return { x: x, y: y };
 }
 
-let PROMOTION_OPTIONS = ["Q", "R", "B", "N"];
-
 /** Calculates the possible moves for the selected piece, returning an SVG rendering them all as an overlay on the board. */
 
 function PromotionPiece(i: number, move: Move, onClick: (move: Move) => void) {
@@ -95,7 +89,6 @@ function PromotionPiece(i: number, move: Move, onClick: (move: Move) => void) {
         className={styles.promotionOption}
         src={piece_url(piece, color)}
         onClick={() => {
-          console.log("PROMOTION SELECTED");
           onClick(move);
         }}
       ></img>
@@ -111,48 +104,10 @@ function getPossibleMoves(
 ) {
   let moves = position.moves({ verbose: true }) as Move[];
 
-
-  let color = position.turn();
-  console.log(color);
-
-
-
-  console.log("SEL", selection);
-  
-  let potentialMoves = moves.filter((move) => move.from === selection);
-  console.log(potentialMoves);
-
-  // let isPromotion = potentialMoves.some((x) => {
-  //   return x.san.includes("=");
-  // });
-
-  //   if (isPromotion) {
-  //     let pieces = PROMOTION_OPTIONS.map((x, i) => {
-  //       return PromotionPiece(i, x, color === "w" ? "w" : "b");
-  //     });
-  //     let pos = boardNotationToIndices("a8", perspective);
-  //     // render the promotion menu.
-  //     // this is just four pieces.
-  //     return (
-  //       <div
-  //         key={1000}
-  //         className={styles.piecePromotion}
-  //         css={css`
-  //           transform: translate(${pos.x * 100}%, ${pos.y * 100}%);
-  //         `}
-  //       >
-  //         {pieces}
-  //       </div>
-  //     );
-  //   }
-
-  // console.log("IS PROMOTION: ", isPromotion);
-
   let movesDrawn = moves
     .filter((move) => move.from === selection)
     .map((move) => {
       let pos = boardNotationToIndices(move.to, perspective);
-      console.log("POS", pos);
 
       return (
         <div
@@ -196,7 +151,6 @@ function Piece(i: number, j: number, piece: string, color: string) {
 }
 
 function Labels(perspective: string, light: string, dark: string) {
-  console.log(perspective);
   if (perspective === "black") {
     return (
       <div className={styles.labels}>
@@ -334,7 +288,7 @@ function getMousePos(
 
 function mouseDown(event: MouseEvent) {
   // we want to move the piece with the cursor
-  console.log("pos: " + event.clientX + " " + event.clientY);
+  // console.log("pos: " + event.clientX + " " + event.clientY);
 }
 
 function mouseMove(event: MouseEvent) {}
@@ -387,12 +341,6 @@ export default function NewBoard(props: ChessBoardProps) {
 function PromotionModal(props: PromotionParams) {
   let allMoves = props.board.moves({ verbose: true }) as Move[];
 
-  console.log(
-    allMoves.filter((x) => {
-      return x.san.includes("=");
-    })
-  );
-
   const makeMove = (move: Move) => {
     props.makeAmove(move);
     setIsPromotion(false)
@@ -441,7 +389,7 @@ function PromotionModal(props: PromotionParams) {
       i: Math.floor(r.x / cellSize),
       j: Math.floor(r.y / cellSize),
     };
-    console.log(`Recalculated, converted to index: ${indices.i},${indices.j}`);
+    // console.log(`Recalculated, converted to index: ${indices.i},${indices.j}`);
 
     /* PROCESS THE MOVE */
     const chess = props.board;
@@ -454,7 +402,7 @@ function PromotionModal(props: PromotionParams) {
     let availableMoves: Move[] = chess.moves({ verbose: true }) as Move[];
     for (let i = 0; i < availableMoves.length; i++) {
       // iterate over all the moves & see if the current selection -> target square is a move
-      console.log(props.selection);
+      // console.log(props.selection);
       if (
         availableMoves[i].from === props.selection &&
         availableMoves[i].to === boardNotation
@@ -484,13 +432,13 @@ function PromotionModal(props: PromotionParams) {
       board[indices.j][indices.i]?.color !== color
     ) {
       // set selection
-      console.log("no selection");
-      console.log(board[indices.j][indices.i] === null);
-      console.log(convertIndicesToBoardNotation(indices, props.perspective));
+      // console.log("no selection");
+      // console.log(board[indices.j][indices.i] === null);
+      // console.log(convertIndicesToBoardNotation(indices, props.perspective));
       props.setSelection("");
     } else {
       // set selection
-      console.log("new selection!");
+      // console.log("new selection!");
       props.setSelection(
         convertIndicesToBoardNotation(indices, props.perspective)
       );
@@ -526,11 +474,7 @@ function Background(props: BoardColor) {
   const light = props.light;
   const dark = props.dark;
 
-  function sampleOnClick() {
-    console.log("sheeeeee");
-  }
-
-  console.log("RENDERING BACKGROUND!");
+  // console.log("RENDERING BACKGROUND!");
 
   return (
     <div ref={props.refToPass} onClick={props.onClickHandler}>
