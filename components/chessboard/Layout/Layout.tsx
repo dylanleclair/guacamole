@@ -118,6 +118,10 @@ const Layout = (props: LayoutProps) => {
       </nav>
 
       {props.children && props.children}
+
+      <div id="footer" className="py-4 mt-4 bg-light text-center">
+        Developed by the Caskaydia Chess Team © 2022
+      </div>
     </div>
   );
 };

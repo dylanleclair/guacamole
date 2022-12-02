@@ -1,5 +1,6 @@
 import { SessionProvider } from "next-auth/react";
 import "styles/global.scss";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 import type { AppProps } from "next/app";
 
