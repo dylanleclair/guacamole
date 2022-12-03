@@ -30,9 +30,11 @@ export function request<T>(
  */
 export function postJSON(url: string, payload: any) {
   return fetch(url, {
-    method: "POST", body: JSON.stringify(payload), headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
     },
-  })
+  });
 }
