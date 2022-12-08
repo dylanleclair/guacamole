@@ -97,14 +97,14 @@ const Home: NextPage = () => {
         
           if (user) {
             let oppositePlayerID = user._id === result.player1id ? result.player2id : result.player1id;
-            postJSON("localhost:3000", {id : oppositePlayerID}).then(
+            postJSON("/api/user/info", {id : oppositePlayerID}).then(
               (innerResponse) => {// load up the pgn for the match from the database
                 // if the player's id matches the player1id in Match
                 // the player's color is white!
                 isPlayerWhite = user._id === result.player1id ? true : false;
                 
                 if (innerResponse.ok) {
-                  response.json().then((opponent) => {
+                  innerResponse.json().then((opponent) => {
 
 
                     let chess = new Chess();
@@ -446,7 +446,7 @@ const Home: NextPage = () => {
 function PlayerProfile(props: {user: IUser | null})
 {
   if (props.user){
-    let elo = (props.user.elo) ? props.user.elo : 5000;
+    let elo = (props.user.elo) ? props.user.elo : "Unranked";
 
     return(
       <div className="row w-100 bg-dark text-white">
