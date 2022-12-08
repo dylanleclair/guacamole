@@ -4,8 +4,9 @@ import { css } from "@emotion/react";
 
 import styles from "./chessboard.module.css";
 
-import React, { MouseEvent, useRef, useState } from "react";
+import React, { MouseEvent, useContext, useRef, useState } from "react";
 import { EmotionJSX } from "@emotion/react/types/jsx-namespace";
+import { UserInfoContext } from "../../context/UserInfo";
 
 interface Position {
   x: number;
@@ -20,7 +21,6 @@ interface ColorScheme {
 interface ChessBoardProps {
   board: Chess;
   isPlayerWhite: boolean;
-  colorScheme?: ColorScheme;
   selection: string;
   setSelection(selection: string): void;
   makeAmove(move: Move): void;
@@ -80,8 +80,8 @@ function boardNotationToIndices(pos: string, perspective: string) {
 /** Calculates the possible moves for the selected piece, returning an SVG rendering them all as an overlay on the board. */
 
 function PromotionPiece(i: number, move: Move, onClick: (move: Move) => void) {
-  
-  if (move.promotion){
+
+  if (move.promotion) {
     let piece = move.promotion;
     let color = move.color;
     return (
@@ -316,9 +316,9 @@ function mouseDown(event: MouseEvent) {
   // console.log("pos: " + event.clientX + " " + event.clientY);
 }
 
-function mouseMove(event: MouseEvent) {}
+function mouseMove(event: MouseEvent) { }
 
-function mouseUp(event: MouseEvent) {}
+function mouseUp(event: MouseEvent) { }
 
 interface PromotionParams {
   board: Chess;
@@ -328,8 +328,21 @@ interface PromotionParams {
 
 
 export default function NewBoard(props: ChessBoardProps) {
-  const light = props.colorScheme?.light ?? "white";
-  const dark = props.colorScheme?.dark ?? "#fca311";
+
+  const userInfo = useContext(UserInfoContext);
+
+  let light = "white";
+  let dark = "#fca311";
+
+  if (userInfo) {
+    if (userInfo.user.boardLightColor) {
+      light = userInfo.user.boardLightColor;
+    }
+    if (userInfo.user.boardDarkColor) {
+      dark = userInfo.user.boardDarkColor;
+    }
+  }
+
 
   const boardRef = useRef<HTMLDivElement>(null);
   const [isPromotion, setIsPromotion] = useState<boolean>(false);
@@ -364,43 +377,43 @@ export default function NewBoard(props: ChessBoardProps) {
 
 
 
-function PromotionModal(props: PromotionParams) {
-  let allMoves = props.board.moves({ verbose: true }) as Move[];
+  function PromotionModal(props: PromotionParams) {
+    let allMoves = props.board.moves({ verbose: true }) as Move[];
 
-  const makeMove = (move: Move) => {
-    props.makeAmove(move);
-    setIsPromotion(false)
-    setPromotionSquare("");
-  };
+    const makeMove = (move: Move) => {
+      props.makeAmove(move);
+      setIsPromotion(false)
+      setPromotionSquare("");
+    };
 
-  let pieces = allMoves
-    .filter((x) => {
-      return x.san.includes("=") && x.to === promotionSquare;
-    })
-    .map((x, i) => PromotionPiece(i, x, makeMove));
+    let pieces = allMoves
+      .filter((x) => {
+        return x.san.includes("=") && x.to === promotionSquare;
+      })
+      .map((x, i) => PromotionPiece(i, x, makeMove));
 
-  // let pieces = PROMOTION_OPTIONS.map((x, i) => {
-  //   return PromotionPiece(i, x, props.color === "w" ? "w" : "b");
-  // });
+    // let pieces = PROMOTION_OPTIONS.map((x, i) => {
+    //   return PromotionPiece(i, x, props.color === "w" ? "w" : "b");
+    // });
 
-  return (
-    <div className={styles.promotionModalContainer}>
-      <div
-        className={`${styles.promotionModal} d-flex flex-col justify-content-center align-items-center container`}
-      >
-        <h1>Choose a piece to promote to!</h1>
-        <div className="d-flex">{pieces}</div>
+    return (
+      <div className={styles.promotionModalContainer}>
+        <div
+          className={`${styles.promotionModal} d-flex flex-col justify-content-center align-items-center container`}
+        >
+          <h1>Choose a piece to promote to!</h1>
+          <div className="d-flex">{pieces}</div>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   const handleClick = (e: React.MouseEvent) => {
     // this should be refactored /combined with other methods to support dragging a piece to the target location
     // setSelection / makeMove will be passed in as props
 
     if (isPromotion)
-    return;
+      return;
 
     const r = windowToBoardCoords(boardRef.current!, {
       x: e?.clientX,
@@ -435,8 +448,7 @@ function PromotionModal(props: PromotionParams) {
         availableMoves[i].to === boardNotation
       ) {
 
-        if (availableMoves[i].san.includes("="))
-        {
+        if (availableMoves[i].san.includes("=")) {
           setIsPromotion(true);
           setPromotionSquare(availableMoves[i].to);
         } else {
@@ -448,14 +460,14 @@ function PromotionModal(props: PromotionParams) {
       }
     }
 
-    
+
 
     const color = props.isPlayerWhite ? "w" : "b";
 
     // (selection is same as previous || the place on board is empty || the place on the board is other player's color)
     if (
       convertIndicesToBoardNotation(indices, props.perspective) ===
-        props.selection ||
+      props.selection ||
       board[indices.j][indices.i] === null ||
       board[indices.j][indices.i]?.color !== color
     ) {
@@ -483,7 +495,7 @@ function PromotionModal(props: PromotionParams) {
         board={props.board}
         perspective={props.perspective}
       >
-        {isPromotion && <PromotionModal selection={props.selection} board={props.board} makeAmove={props.makeAmove}/>}
+        {isPromotion && <PromotionModal selection={props.selection} board={props.board} makeAmove={props.makeAmove} />}
         {pieces && pieces}
         {possibleMoves && possibleMoves}
         {Labels(props.perspective, dark, light)}
