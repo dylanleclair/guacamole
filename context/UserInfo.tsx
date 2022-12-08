@@ -34,10 +34,10 @@ export function UserInfoProvider(props: UserInfoProviderProps) {
 
   const setUserCallback = (user: IUser) => setUser(user);
 
-  if (!user) return <CircularLoader />;
+  if (!user) return props.children; // return normal data
   return (
-    <UserInfoContext.Provider value={{ user, setUser: setUserCallback }}>
+    <UserInfoContext.Provider value={{ user: user, setUser: setUserCallback }}>
       {props.children}
-    </UserInfoContext.Provider>
+    </UserInfoContext.Provider >
   );
 }
