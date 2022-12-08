@@ -21,8 +21,10 @@ import { match } from "assert";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
-import { request } from "../../utils/networkingutils";
+import { postJSON, request } from "../../utils/networkingutils";
 import { UserInfoContext } from "../../context/UserInfo";
+import { UserInfo } from "os";
+import { css } from "@emotion/react";
 
 const socket = SocketIO();
 
@@ -50,6 +52,7 @@ interface PlayInteface {
   selection: string;
   isPlayerWhite: boolean;
   user: IUser | null;
+  opponent: IUser | null;
   matchData: MatchMetadata;
   perspective: string;
   match_state: MATCH_STATES;
@@ -62,6 +65,7 @@ const defaultProps = {
   matchId: "",
   selection: "",
   isPlayerWhite: true,
+  opponent: null,
   user: null,
   matchData: { winner: "", method: "" },
   perspective: "white",
@@ -90,30 +94,45 @@ const Home: NextPage = () => {
 
         response.json().then((data) => {
           let result = data as IMatch; // interpret data from endpoint as a Match
-
+        
           if (user) {
-            // if the player's id matches the player1id in Match
-            // the player's color is white!
-            isPlayerWhite = user._id === result.player1id ? true : false;
+            let oppositePlayerID = user._id === result.player1id ? result.player2id : result.player1id;
+            postJSON("/api/user/info", {id : oppositePlayerID}).then(
+              (innerResponse) => {// load up the pgn for the match from the database
+                // if the player's id matches the player1id in Match
+                // the player's color is white!
+                isPlayerWhite = user._id === result.player1id ? true : false;
+                console.log("RESPONSE BODY:",  response.body);
+                if (innerResponse.ok) {
+                  innerResponse.json().then((opponent) => {
+                    console.log("OPPONENT: ", opponent);
+
+                    let chess = new Chess();
+                    chess.loadPgn(result.pgn);
+          
+                    // update everything!
+                    // the board, match ID, player color, user data, and default board perspective (same as player color)
+                    setState({
+                      ...state,
+                      board: chess,
+                      matchId: result._id,
+                      isPlayerWhite: isPlayerWhite,
+                      user: user,
+                      perspective: isPlayerWhite ? "white" : "black",
+                      match_state: MATCH_STATES.MATCH_PLAYING,
+                      opponent: opponent as IUser,
+                    });
+          
+                    socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
+                  })
+                }
+
+                 
+              }
+            );
+            
           }
 
-          // load up the pgn for the match from the database
-          let chess = new Chess();
-          chess.loadPgn(result.pgn);
-
-          // update everything!
-          // the board, match ID, player color, user data, and default board perspective (same as player color)
-          setState({
-            ...state,
-            board: chess,
-            matchId: result._id,
-            isPlayerWhite: isPlayerWhite,
-            user: user,
-            perspective: isPlayerWhite ? "white" : "black",
-            match_state: MATCH_STATES.MATCH_PLAYING,
-          });
-
-          socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
         });
       } else {
         // what to do when no match could be fetched!
@@ -148,6 +167,8 @@ const Home: NextPage = () => {
       // -> might want to move that stuff into a function tbh
       console.log("GOT MATCH START!");
       fetchActiveMatch(state.user);
+
+      
     });
 
     // set socket move handler
@@ -379,7 +400,9 @@ const Home: NextPage = () => {
             <div>Match: {state.matchId}</div>
 
             <div>Player color: {state.isPlayerWhite ? "white" : "black"}</div>
-
+            <PlayerProfile
+            user={state.user}
+            />
             {state && (
               <ChessBoard
                 board={state.board}
@@ -390,6 +413,9 @@ const Home: NextPage = () => {
                 setSelection={selectPiece}
               />
             )}
+            <PlayerProfile
+            user={state.opponent}
+            />
             <div className="w-100 d-flex justify-content-between mt-3">
               <div>
                 <button
@@ -416,5 +442,25 @@ const Home: NextPage = () => {
     </div>
   );
 };
+
+function PlayerProfile(props: {user: IUser | null})
+{
+  if (props.user){
+    let elo = (props.user.elo) ? props.user.elo : 5000;
+
+    return(
+      <div className="row w-100 bg-dark text-white">
+        <div className="col-2 p-0">
+        <img src={props.user.image} className="img-fluid"/>
+        </div>
+        <div className="col-10">
+          <h1 className="display-6">{props.user.name} <img src="diamond.png" css={css`width: 1em; height: 1em;`} className="diamond-icon"/> 
+          <span css={css`font-size : .7em;`}>{` (${elo})`}</span></h1>
+        </div>
+      </div>
+    )
+  };
+  return(<div></div>);
+}
 
 export default Home;

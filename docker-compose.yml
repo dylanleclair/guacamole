@@ -38,7 +38,7 @@ services:
       MONGODB_ADMINPASSWORD: example
       MONGODB_URL: mongodb://root:example@mongo:27017/test?authSource=admin
       MONGODB_URI: mongodb://root:example@mongo:27017/
-      #NEXTAUTH_URL: http://184.64.104.125:3000
+      #NEXTAUTH_URL: http://localhost:3000
     depends_on:
       - mongo
   
