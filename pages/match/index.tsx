@@ -21,7 +21,7 @@ import { match } from "assert";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
-import { request } from "../../utils/networkingutils";
+import { postJSON, request } from "../../utils/networkingutils";
 import { UserInfoContext } from "../../context/UserInfo";
 import { UserInfo } from "os";
 import { css } from "@emotion/react";
@@ -52,6 +52,7 @@ interface PlayInteface {
   selection: string;
   isPlayerWhite: boolean;
   user: IUser | null;
+  opponent: IUser | null;
   matchData: MatchMetadata;
   perspective: string;
   match_state: MATCH_STATES;
@@ -64,6 +65,7 @@ const defaultProps = {
   matchId: "",
   selection: "",
   isPlayerWhite: true,
+  opponent: null,
   user: null,
   matchData: { winner: "", method: "" },
   perspective: "white",
@@ -92,30 +94,45 @@ const Home: NextPage = () => {
 
         response.json().then((data) => {
           let result = data as IMatch; // interpret data from endpoint as a Match
-
+        
           if (user) {
-            // if the player's id matches the player1id in Match
-            // the player's color is white!
-            isPlayerWhite = user._id === result.player1id ? true : false;
+            let oppositePlayerID = user._id === result.player1id ? result.player2id : result.player1id;
+            postJSON("localhost:3000", {id : oppositePlayerID}).then(
+              (innerResponse) => {// load up the pgn for the match from the database
+                // if the player's id matches the player1id in Match
+                // the player's color is white!
+                isPlayerWhite = user._id === result.player1id ? true : false;
+                
+                if (innerResponse.ok) {
+                  response.json().then((opponent) => {
+
+
+                    let chess = new Chess();
+                    chess.loadPgn(result.pgn);
+          
+                    // update everything!
+                    // the board, match ID, player color, user data, and default board perspective (same as player color)
+                    setState({
+                      ...state,
+                      board: chess,
+                      matchId: result._id,
+                      isPlayerWhite: isPlayerWhite,
+                      user: user,
+                      perspective: isPlayerWhite ? "white" : "black",
+                      match_state: MATCH_STATES.MATCH_PLAYING,
+                      opponent: opponent as IUser,
+                    });
+          
+                    socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
+                  })
+                }
+
+                 
+              }
+            );
+            
           }
 
-          // load up the pgn for the match from the database
-          let chess = new Chess();
-          chess.loadPgn(result.pgn);
-
-          // update everything!
-          // the board, match ID, player color, user data, and default board perspective (same as player color)
-          setState({
-            ...state,
-            board: chess,
-            matchId: result._id,
-            isPlayerWhite: isPlayerWhite,
-            user: user,
-            perspective: isPlayerWhite ? "white" : "black",
-            match_state: MATCH_STATES.MATCH_PLAYING,
-          });
-
-          socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
         });
       } else {
         // what to do when no match could be fetched!
@@ -397,7 +414,7 @@ const Home: NextPage = () => {
               />
             )}
             <PlayerProfile
-            user={state.user}
+            user={state.opponent}
             />
             <div className="w-100 d-flex justify-content-between mt-3">
               <div>
