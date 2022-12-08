@@ -23,6 +23,7 @@ export default async function handler(
       try {
         const user = await User.findOne({ _id: req.body.id });
         console.log(req.body);
+        console.log(user);
         res.status(200).json(user);
       } catch (error) {
         res.status(400).json(ERROR_CODE.fail);

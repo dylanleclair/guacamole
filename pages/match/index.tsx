@@ -97,15 +97,15 @@ const Home: NextPage = () => {
         
           if (user) {
             let oppositePlayerID = user._id === result.player1id ? result.player2id : result.player1id;
-            postJSON("localhost:3000", {id : oppositePlayerID}).then(
+            postJSON("/api/user/info", {id : oppositePlayerID}).then(
               (innerResponse) => {// load up the pgn for the match from the database
                 // if the player's id matches the player1id in Match
                 // the player's color is white!
                 isPlayerWhite = user._id === result.player1id ? true : false;
-                
+                console.log("RESPONSE BODY:",  response.body);
                 if (innerResponse.ok) {
-                  response.json().then((opponent) => {
-
+                  innerResponse.json().then((opponent) => {
+                    console.log("OPPONENT: ", opponent);
 
                     let chess = new Chess();
                     chess.loadPgn(result.pgn);
