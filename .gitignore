@@ -47,8 +47,11 @@ __pycache__/
 # Flask stuff:
 instance/
 .webassets-cache
-
 **/venv
+
+# tsc -> js files
+lib/emit_messages.js
+socket/socketHandler.js
 yarn.lock
 
 socket/socketHandler.js

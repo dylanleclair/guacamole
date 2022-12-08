@@ -102,10 +102,14 @@ const Home: NextPage = () => {
                 // if the player's id matches the player1id in Match
                 // the player's color is white!
                 isPlayerWhite = user._id === result.player1id ? true : false;
-                
+                console.log("RESPONSE BODY:",  response.body);
                 if (innerResponse.ok) {
                   innerResponse.json().then((opponent) => {
+<<<<<<< HEAD
 
+=======
+                    console.log("OPPONENT: ", opponent);
+>>>>>>> origin/main
 
                     let chess = new Chess();
                     chess.loadPgn(result.pgn);

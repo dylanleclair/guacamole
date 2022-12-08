@@ -77,11 +77,11 @@ export default function Analysis(props: AnalysisProps) {
           throw Error("PGN could not be parsed !!");
         }
       } catch (err) {
-        
+
       }
     }
 
-    return () => {};
+    return () => { };
   }, [state]);
 
   /**
@@ -119,33 +119,31 @@ export default function Analysis(props: AnalysisProps) {
    * Select piece
    */
   function selectPiece(selection: string) {
-    if (state.component_state === STATES.ANALYZE) {
-      setState({
-        ...state,
-        selection: selection,
-      });
-    }
+    // if (state.component_state === STATES.ANALYZE) {
+    //   setState({
+    //     ...state,
+    //     selection: selection,
+    //   });
+    // }
   }
 
-  function handleNextClicked()
-  {
+  function handleNextClicked() {
     let new_board = new Chess();
     let isPGNValid = new_board.loadPgn(state.board.pgn());
     new_board.move(state.history[state.move_index]);
     // make the move & increment move index
     setState({
-        ...state,
-        board: new_board,
-        move_index: state.move_index + 1
+      ...state,
+      board: new_board,
+      move_index: state.move_index + 1
     })
   }
 
-    function handleBackClicked() {
-      let new_board = new Chess();
-      let isPGNValid = new_board.loadPgn(state.board.pgn());
+  function handleBackClicked() {
+    let new_board = new Chess();
+    let isPGNValid = new_board.loadPgn(state.board.pgn());
 
-      if (isPGNValid)
-      {
+    if (isPGNValid) {
       new_board.undo();
       // make the move & increment move index
       setState({
@@ -153,16 +151,12 @@ export default function Analysis(props: AnalysisProps) {
         board: new_board,
         move_index: state.move_index - 1,
       });
-      }
-
     }
 
+  }
+
   return (
-    <div>
-      <div>
-        <h1>History</h1>
-        <div>{state.history.join(" ")}</div>
-      </div>
+    <div className="w-100">
 
       <ChessBoard
         board={state.board}
@@ -173,10 +167,35 @@ export default function Analysis(props: AnalysisProps) {
         makeAmove={makeMove}
       />
 
-      <button onClick={handleBackClicked}>Previous</button>
-      <button onClick={handleNextClicked}>Next</button>
+      <div className="w-100 d-flex justify-content-between mt-3">
+        <div>
+          <button
+            className="btn btn-sm btn-dark mr-2"
+            onClick={flipBoard}
+          >
+            <i className="bi bi-arrow-repeat"></i> Flip Board
+          </button>
+        </div>
 
-      <button onClick={flipBoard}>flip perspective</button>
-    </div>
+        <div className="d-flex gap-2">
+          <button
+            className="btn btn-sm btn-dark ml-1"
+            onClick={handleBackClicked}
+          >
+            <i className="bi bi-arrow-right-circle"></i> Previous
+          </button>
+          <button className="btn btn-sm btn-dark" onClick={handleNextClicked}>
+            <i className="bi bi-unlock"></i> Next
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <h1>History</h1>
+        <div>{state.history.join(" ")}</div>
+      </div>
+
+
+    </div >
   );
 }
