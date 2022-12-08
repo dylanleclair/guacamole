@@ -54,32 +54,12 @@ function fetchPGN() {
 
 const Home: NextPage = () => {
     const { data: session } = useSession();
-    // const [state, setState] = useState<AnalysisData>(defaultProps);
 
     const [pgn, setPGN] = useState<string>("");
 
-    // check if the user is signed in. if they are, show them the matchmaking component
-
-    const signin = session ? (
-        <div>
-            Signed in as {session.user?.email}
-            <br />
-            <button onClick={() => signOut()}>Sign out</button>
-        </div>
-    ) : (
-        <div>
-            Not signed in.
-            <br />
-            <button onClick={() => signIn()}>Sign in</button>
-        </div>
-    );
-
-
-    // const moves_cmpnt = state.moves?.map((str, i) => <li key={i}>{str}</li>)
-
-    // const handleClose = () => {
-    //     setState({...state, puzzle_state: PUZZLE_STATES.PUZZLE_INIT});
-    // };
+    function handlePGNChange(e: React.ChangeEvent<HTMLTextAreaElement>): void {
+        setPGN(e.currentTarget.value);
+    }
 
     return (
         <div className="row">
@@ -120,12 +100,13 @@ const Home: NextPage = () => {
                     <div className="w-100 card my-3">
                         <div className="card-body d-flex flex-col justify-content-center align-items-center">
 
-                            <label htmlFor="basic-url" className="form-label">Paste your game PGN here...</label>
+                            <label htmlFor="PGN-input" className="form-label">Paste your game PGN here...</label>
                             <div className="input-group">
-                                <textarea className="form-control mb-3" placeholder={fetchPGN()} aria-label="With textarea"></textarea>
+                                <textarea id="PGN-input" className="form-control" placeholder={fetchPGN()} value={pgn} aria-label="PGN" onChange={handlePGNChange}></textarea>
                             </div>
+                            <div className="btn btn-primary w-100 my-3">Load PGN</div>
 
-                            <Analysis match_pgn={fetchPGN()} />
+                            <Analysis match_pgn={pgn} />
 
                         </div>
                     </div>
