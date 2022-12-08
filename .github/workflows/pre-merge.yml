@@ -17,4 +17,4 @@ jobs:
     - name: Prettier Formatting
       uses: creyD/prettier_action@v4.2
       with:
-          prettier_options: --write **/*.{js,ts,md}
+          prettier_options: --write **/*.{js,ts,md,py}
