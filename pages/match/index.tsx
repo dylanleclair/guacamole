@@ -150,6 +150,8 @@ const Home: NextPage = () => {
       // -> might want to move that stuff into a function tbh
       console.log("GOT MATCH START!");
       fetchActiveMatch(state.user);
+
+      
     });
 
     // set socket move handler
@@ -394,6 +396,9 @@ const Home: NextPage = () => {
                 setSelection={selectPiece}
               />
             )}
+            <PlayerProfile
+            user={state.user}
+            />
             <div className="w-100 d-flex justify-content-between mt-3">
               <div>
                 <button
