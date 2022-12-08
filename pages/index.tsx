@@ -64,16 +64,8 @@ const Home: NextPage = () => {
             <div className="col-10 bg-primary rounded-3 bg-light p-4">
               <div className="">
                 <h2>Online Chess</h2>
-                <p>Puzzles.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="row justify-content-center text-end">
-            <div className="col-10 bg-primary rounded-3 bg-light p-4">
-              <div className="">
-                <h2>Online Chess</h2>
-                <p>Puzzles.</p>
+                <p>Caskaydia is the place to play online chess! 
+                Play for free against players according to your skill level! </p>
               </div>
             </div>
           </div>
@@ -81,8 +73,17 @@ const Home: NextPage = () => {
           <div className="row justify-content-center">
             <div className="col-10 bg-primary rounded-3 bg-light p-4">
               <div className="">
-                <h2>Online Chess</h2>
-                <p>Puzzles.</p>
+                <h2>Puzzles</h2>
+                <p>We have a library of AI generated puzzles to develop and test your chess knowledge! </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="row justify-content-center">
+            <div className="col-10 bg-primary rounded-3 bg-light p-4">
+              <div className="">
+                <h2>CPU Players</h2>
+                <p>In your downtime, play against our computer players to help sharpen your skills without all the pressure!</p>
               </div>
             </div>
           </div>
