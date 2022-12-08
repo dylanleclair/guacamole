@@ -23,6 +23,8 @@ import Button from "react-bootstrap/Button";
 
 import { request } from "../../utils/networkingutils";
 import { UserInfoContext } from "../../context/UserInfo";
+import { UserInfo } from "os";
+import { css } from "@emotion/react";
 
 const socket = SocketIO();
 
@@ -379,7 +381,9 @@ const Home: NextPage = () => {
             <div>Match: {state.matchId}</div>
 
             <div>Player color: {state.isPlayerWhite ? "white" : "black"}</div>
-
+            <PlayerProfile
+            user={state.user}
+            />
             {state && (
               <ChessBoard
                 board={state.board}
@@ -416,5 +420,25 @@ const Home: NextPage = () => {
     </div>
   );
 };
+
+function PlayerProfile(props: {user: IUser | null})
+{
+  if (props.user){
+    let elo = (props.user.elo) ? props.user.elo : 5000;
+
+    return(
+      <div className="row w-100 bg-dark text-white">
+        <div className="col-2 p-0">
+        <img src={props.user.image} className="img-fluid"/>
+        </div>
+        <div className="col-10">
+          <h1 className="display-6">{props.user.name} <img src="diamond.png" css={css`width: 1em; height: 1em;`} className="diamond-icon"/> 
+          <span css={css`font-size : .7em;`}>{` (${elo})`}</span></h1>
+        </div>
+      </div>
+    )
+  };
+  return(<div></div>);
+}
 
 export default Home;
