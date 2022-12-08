@@ -18,4 +18,3 @@ jobs:
       uses: creyD/prettier_action@v4.2
       with:
           prettier_options: --write **/*.{js,ts,md}
-          only_changed: True
