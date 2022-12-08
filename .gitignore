@@ -50,3 +50,7 @@ instance/
 
 **/venv
 yarn.lock
+
+socket/socketHandler.js
+lib/emit_messages.js
+index.js

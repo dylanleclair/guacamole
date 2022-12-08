@@ -3,7 +3,7 @@ volumes:
   docker:
 
 services:
-  engine:
+  sf-engine:
     build: ./engine-testing
     restart: always
     ports:

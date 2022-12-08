@@ -21,3 +21,20 @@ export function request<T>(
   // We also can use some post-response
   // data-transformations in the last `then` clause.
 }
+
+/**
+ * Use when POSTing JSON with fetch so that servers properly parse the body as JSON
+ * @param url - the api endpoint to POST to
+ * @param payload  - the data you with to JSONify & send
+ * @returns a promise, with the response of fetch(url, ..., payload)
+ */
+export function postJSON(url: string, payload: any) {
+  return fetch(url, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  });
+}
