@@ -98,7 +98,7 @@ const Layout = (props: LayoutProps) => {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link href="#" passHref>
+                <Link href="/analyze" passHref>
                   <a className="nav-link">Analysis</a>
                 </Link>
               </li>

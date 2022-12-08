@@ -25,6 +25,7 @@ import { postJSON, request } from "../../utils/networkingutils";
 import { UserInfoContext } from "../../context/UserInfo";
 import { UserInfo } from "os";
 import { css } from "@emotion/react";
+import CircularLoader from "../../components/CircularLoader";
 
 const socket = SocketIO();
 
@@ -72,8 +73,6 @@ const defaultProps = {
   match_state: MATCH_STATES.MATCH_INIT,
 };
 
-let isInitialLoad = true;
-
 const Home: NextPage = () => {
   const { data: session } = useSession();
   const [state, setState] = useState<PlayInteface>(defaultProps);
@@ -94,22 +93,22 @@ const Home: NextPage = () => {
 
         response.json().then((data) => {
           let result = data as IMatch; // interpret data from endpoint as a Match
-        
+
           if (user) {
             let oppositePlayerID = user._id === result.player1id ? result.player2id : result.player1id;
-            postJSON("/api/user/info", {id : oppositePlayerID}).then(
+            postJSON("/api/user/info", { id: oppositePlayerID }).then(
               (innerResponse) => {// load up the pgn for the match from the database
                 // if the player's id matches the player1id in Match
                 // the player's color is white!
                 isPlayerWhite = user._id === result.player1id ? true : false;
-                console.log("RESPONSE BODY:",  response.body);
+                console.log("RESPONSE BODY:", response.body);
                 if (innerResponse.ok) {
                   innerResponse.json().then((opponent) => {
                     console.log("OPPONENT: ", opponent);
 
                     let chess = new Chess();
                     chess.loadPgn(result.pgn);
-          
+
                     // update everything!
                     // the board, match ID, player color, user data, and default board perspective (same as player color)
                     setState({
@@ -122,15 +121,15 @@ const Home: NextPage = () => {
                       match_state: MATCH_STATES.MATCH_PLAYING,
                       opponent: opponent as IUser,
                     });
-          
+
                     socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
                   })
                 }
 
-                 
+
               }
             );
-            
+
           }
 
         });
@@ -168,7 +167,7 @@ const Home: NextPage = () => {
       console.log("GOT MATCH START!");
       fetchActiveMatch(state.user);
 
-      
+
     });
 
     // set socket move handler
@@ -386,10 +385,13 @@ const Home: NextPage = () => {
 
         <h1 className="display-2">Play vs Human</h1>
 
-        <p>Play against another person!</p>
+        <p>Play a match against other players from across the world!</p>
+
+        {state.match_state === MATCH_STATES.MATCH_INIT && <CircularLoader />}
 
         <div className="w-100 card my-3">
           <div className="card-body d-flex flex-col justify-content-center align-items-center">
+
             <div>Match: {state.matchId}</div>
 
             <div>Player color: {state.isPlayerWhite ? "white" : "black"}</div>
@@ -400,7 +402,7 @@ const Home: NextPage = () => {
             />
             )}
             <PlayerProfile
-            user={state.user}
+              user={state.user}
             />
             {state && (
               <ChessBoard
@@ -413,7 +415,7 @@ const Home: NextPage = () => {
               />
             )}
             <PlayerProfile
-            user={state.opponent}
+              user={state.opponent}
             />
             <div className="w-100 d-flex justify-content-between mt-3">
               <div>
