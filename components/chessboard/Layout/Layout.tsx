@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import { NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -38,7 +39,9 @@ const Layout = (props: LayoutProps) => {
   );
 
   return (
-    <div>
+    <div
+      css={css`height: 96vh`}
+      className="d-flex justify-content-between flex-col">
       <nav className="navbar fixed-top navbar-expand-lg bg-white">
         <div className="container-fluid">
           <Link href="/" passHref>
@@ -82,7 +85,7 @@ const Layout = (props: LayoutProps) => {
                     </Link>
                   </li>
                   <li>
-                    <Link href="#" passHref>
+                    <Link href="/match/computer" passHref>
                       <a className="dropdown-item">Computer</a>
                     </Link>
                   </li>
@@ -119,8 +122,8 @@ const Layout = (props: LayoutProps) => {
 
       {props.children && props.children}
 
-      <div id="footer" className="py-4 mt-4 bg-light text-center">
-        Developed by the Caskaydia Chess Team © 2022
+      <div id="footer" css={css`height: 4vh;`} className="bg-light text-center d-flex justify-content-center align-items-center">
+        Developed by the <a className="mx-2" href="https://github.com/dylanleclair/guacamole">Caskaydia Chess Team</a> © 2022
       </div>
     </div>
   );

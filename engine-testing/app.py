@@ -71,8 +71,9 @@ async def sendfen() -> Response:
         if board.is_valid():
             analysis = engine.analyse(board, chess.engine.Limit(time=0.1))
             wdl = analysis["score"].relative.wdl()
+            move = str(analysis["pv"][0])
             resp = {
-                "move": str(analysis["pv"][0]),
+                "move": board.san(analysis["pv"][0]), # convert to SAN
                 "top_3": list(map(lambda x: str(x), analysis["pv"][0:3])),
                 "wdl": [wdl.wins, wdl.draws, wdl.losses]
             }

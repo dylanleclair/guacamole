@@ -53,4 +53,7 @@ instance/
 lib/emit_messages.js
 socket/socketHandler.js
 yarn.lock
+
+socket/socketHandler.js
+lib/emit_messages.js
 index.js

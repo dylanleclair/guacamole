@@ -11,6 +11,7 @@ export const authOptions = {
       clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
+  secret: process.env.SECRET,
   adapter: MongoDBAdapter(clientPromise),
   debug: process.env.NODE_ENV === "development",
   callbacks: {
