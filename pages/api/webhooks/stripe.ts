@@ -3,6 +3,9 @@ import { buffer } from "micro";
 import Stripe from "stripe";
 import User from "../../../models/User";
 
+const endpointSecret =
+  "whsec_f6cdd8ac52b3b4853d7d70f02718e80dca4b2dd9ff9e6e4f2b9c45571d234179";
+
 export const config = {
   api: {
     bodyParser: false, // don't parse body of incoming requests because we need it raw to verify signature
@@ -27,7 +30,7 @@ export default async (
       event = stripe.webhooks.constructEvent(
         requestBuffer.toString(),
         sig,
-        process.env.STRIPE_ENDPOINT_SECRET!
+        endpointSecret
       );
     } catch (err: any) {
       console.log(`⚠️  Webhook signature verification failed.`, err.message);
