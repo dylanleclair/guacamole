@@ -2,32 +2,37 @@ import { Chess } from "chess.js";
 import type { NextPage } from "next";
 import ChessBoard from "../components/chessboard/ChessBoard";
 import Link from "next/link";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { UserInfoContext } from "../context/UserInfo";
 import CircularLoader from "../components/CircularLoader";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { IUser } from "../models/User";
-import { putJSON, request } from "../utils/networkingutils";
+import { putJSON } from "../utils/networkingutils";
+import { SketchPicker } from "react-color";
 
 type Inputs = {
   name: string;
-  boardLightColor?: string;
-  boardDarkColor?: string;
 };
 
 const Profile: NextPage = () => {
   const { user, setUser } = useContext(UserInfoContext)!;
+  const [boardLightColor, setBoardLightColor] = useState(
+    user?.boardLightColor ?? "white"
+  );
+  const [boardDarkColor, setBoardDarkColor] = useState(
+    user?.boardDarkColor ?? "#FCA311"
+  );
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    putJSON("/api/user", data).then((response) => {
+    const updatedProfile = { boardLightColor, boardDarkColor, ...data };
+    putJSON("/api/user", updatedProfile).then((response) => {
       if (response.ok) {
-        let userData = data as IUser;
+        let userData = updatedProfile as IUser;
         setUser(Object.assign({}, user, userData));
       } else {
         console.log(response.json);
@@ -36,9 +41,15 @@ const Profile: NextPage = () => {
     });
   };
 
+  const handleLightColorChange = (color: any) => {
+    setBoardLightColor(color.hex);
+  };
+
+  const handleDarkColorChange = (color: any) => {
+    setBoardDarkColor(color.hex);
+  };
+
   if (!user) return <CircularLoader />;
-  let lightColor = user.boardLightColor ?? "white";
-  let darkColor = user.boardDarkColor ?? "#FCA311";
   return (
     <div className="container text-center p-4">
       <div className="row mb-5">
@@ -73,32 +84,50 @@ const Profile: NextPage = () => {
             <h5 className="text-start fw-semibold mt-5 mb-4">
               Your board colors:
             </h5>
-            <h6 className="text-start">Light:</h6>
-            <input
-              defaultValue={lightColor}
-              {...register("boardLightColor")}
-              type="text"
-              className="form-control mt-3"
-              placeholder={lightColor}
-            />
-            <h6 className="text-start mt-4">Dark:</h6>
-            <input
-              defaultValue={darkColor}
-              {...register("boardDarkColor")}
-              type="text"
-              className="form-control mt-3 mb-5"
-              placeholder={darkColor}
-            />
+            <div className="row mb-5">
+              <div className="col d-flex flex-col align-items-center">
+                <h6 className="text-start">Light:</h6>
+                <SketchPicker
+                  width="70%"
+                  disableAlpha={true}
+                  presetColors={[
+                    "white",
+                    "yellow",
+                    "orange",
+                    "lightblue",
+                    "lightgreen",
+                    "lightpink",
+                  ]}
+                  className="mt-3"
+                  color={boardLightColor}
+                  onChangeComplete={handleLightColorChange}
+                />
+              </div>
+              <div className="col d-flex flex-col align-items-center">
+                <h6 className="text-start">Dark:</h6>
+                <SketchPicker
+                  width="70%"
+                  disableAlpha={true}
+                  presetColors={[
+                    "#FCA311",
+                    "purple",
+                    "blue",
+                    "brown",
+                    "darkgreen",
+                    "red",
+                  ]}
+                  className="mt-3"
+                  color={boardDarkColor}
+                  onChangeComplete={handleDarkColorChange}
+                />
+              </div>
+            </div>
             <ChessBoard
               board={new Chess()}
               isPlayerWhite={true}
               colorScheme={{
-                light: !watch("boardLightColor")
-                  ? user.boardLightColor
-                  : watch("boardLightColor"),
-                dark: !watch("boardDarkColor")
-                  ? user.boardDarkColor
-                  : watch("boardDarkColor"),
+                light: boardLightColor,
+                dark: boardDarkColor,
               }}
               selection={""}
               setSelection={() => {}}
