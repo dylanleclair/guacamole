@@ -1,7 +1,32 @@
 import type { NextPage } from "next";
+import { useState } from "react";
+import { useRouter } from "next/router";
+import CircularLoader from "../components/CircularLoader";
 
 const Upgrade: NextPage = () => {
-  return (
+  const router = useRouter();
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+
+  const goToCheckout = async () => {
+    setIsCheckoutLoading(true);
+    const res = await fetch(`/api/stripe/create-checkout-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const { redirectUrl } = await res.json();
+    if (redirectUrl) {
+      router.push(redirectUrl);
+    } else {
+      setIsCheckoutLoading(false);
+      console.log("Error creating checkout session");
+    }
+  };
+
+  return isCheckoutLoading ? (
+    <CircularLoader />
+  ) : (
     <div className="container text-center p-4">
       <div className="row">
         <div className="col">
@@ -11,6 +36,7 @@ const Upgrade: NextPage = () => {
             <button
               className="btn btn-lg btn-primary text-white fw-bold w-75 mt-4 mb-2"
               type="button"
+              onClick={goToCheckout}
             >
               Upgrade for $5.00/mo
             </button>
@@ -57,5 +83,13 @@ const Upgrade: NextPage = () => {
     </div>
   );
 };
+
+export async function getStaticProps() {
+  return {
+    props: {
+      protected: true,
+    },
+  };
+}
 
 export default Upgrade;

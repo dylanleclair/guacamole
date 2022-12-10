@@ -7,7 +7,7 @@ import { UserInfoContext } from "../context/UserInfo";
 import CircularLoader from "../components/CircularLoader";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { IUser } from "../models/User";
-import { request } from "../utils/networkingutils";
+import { putJSON, request } from "../utils/networkingutils";
 
 type Inputs = {
   name: string;
@@ -25,19 +25,13 @@ const Profile: NextPage = () => {
   } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    const requestConfig = {
-      method: "PUT",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(data),
-    };
-    request<IUser>("/api/user", requestConfig).then((result) => {
-      if (result) {
+    putJSON("/api/user", data).then((response) => {
+      if (response.ok) {
         let userData = data as IUser;
         setUser(Object.assign({}, user, userData));
       } else {
-        throw Error("User does not exist?");
+        console.log(response.json);
+        throw Error("User could not be updated");
       }
     });
   };
@@ -123,5 +117,13 @@ const Profile: NextPage = () => {
     </div>
   );
 };
+
+export async function getStaticProps() {
+  return {
+    props: {
+      protected: true,
+    },
+  };
+}
 
 export default Profile;

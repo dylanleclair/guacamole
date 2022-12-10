@@ -95,9 +95,13 @@ const Home: NextPage = () => {
           let result = data as IMatch; // interpret data from endpoint as a Match
 
           if (user) {
-            let oppositePlayerID = user._id === result.player1id ? result.player2id : result.player1id;
+            let oppositePlayerID =
+              user._id === result.player1id
+                ? result.player2id
+                : result.player1id;
             postJSON("/api/user/info", { id: oppositePlayerID }).then(
-              (innerResponse) => {// load up the pgn for the match from the database
+              (innerResponse) => {
+                // load up the pgn for the match from the database
                 // if the player's id matches the player1id in Match
                 // the player's color is white!
                 isPlayerWhite = user._id === result.player1id ? true : false;
@@ -123,15 +127,11 @@ const Home: NextPage = () => {
                     });
 
                     socket.emit(WebsocketAction.MATCH_CONNECT, result._id);
-                  })
+                  });
                 }
-
-
               }
             );
-
           }
-
         });
       } else {
         // what to do when no match could be fetched!
@@ -166,8 +166,6 @@ const Home: NextPage = () => {
       // -> might want to move that stuff into a function tbh
       console.log("GOT MATCH START!");
       fetchActiveMatch(state.user);
-
-
     });
 
     // set socket move handler
@@ -396,13 +394,10 @@ const Home: NextPage = () => {
 
         <div className="w-100 card my-3">
           <div className="card-body d-flex flex-col justify-content-center align-items-center">
-
             <div>Match: {state.matchId}</div>
 
             <div>Player color: {state.isPlayerWhite ? "white" : "black"}</div>
-            <PlayerProfile
-              user={state.user}
-            />
+            <PlayerProfile user={state.user} />
             {state && (
               <ChessBoard
                 board={state.board}
@@ -413,9 +408,7 @@ const Home: NextPage = () => {
                 setSelection={selectPiece}
               />
             )}
-            <PlayerProfile
-              user={state.opponent}
-            />
+            <PlayerProfile user={state.opponent} />
             <div className="w-100 d-flex justify-content-between mt-3">
               <div>
                 <button
@@ -438,29 +431,49 @@ const Home: NextPage = () => {
           </div>
         </div>
       </main>
-
     </div>
   );
 };
 
-function PlayerProfile(props: {user: IUser | null})
-{
-  if (props.user){
-    let elo = (props.user.elo) ? props.user.elo : 5000;
+function PlayerProfile(props: { user: IUser | null }) {
+  if (props.user) {
+    let elo = props.user.elo ? props.user.elo : 5000;
 
-    return(
+    return (
       <div className="row w-100 bg-dark text-white">
         <div className="col-2 p-0">
-        <img src={props.user.image} className="img-fluid"/>
+          <img src={props.user.image} className="img-fluid" />
         </div>
         <div className="col-10">
-          <h1 className="display-6">{props.user.name} <img src="diamond.png" css={css`width: 1em; height: 1em;`} className="diamond-icon"/> 
-          <span css={css`font-size : .7em;`}>{` (${elo})`}</span></h1>
+          <h1 className="display-6">
+            {props.user.name}{" "}
+            <img
+              src="diamond.png"
+              css={css`
+                width: 1em;
+                height: 1em;
+              `}
+              className="diamond-icon"
+            />
+            <span
+              css={css`
+                font-size: 0.7em;
+              `}
+            >{` (${elo})`}</span>
+          </h1>
         </div>
       </div>
-    )
+    );
+  }
+  return <div></div>;
+}
+
+export async function getStaticProps() {
+  return {
+    props: {
+      protected: true,
+    },
   };
-  return(<div></div>);
 }
 
 export default Home;

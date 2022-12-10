@@ -25,6 +25,7 @@ interface ChessBoardProps {
   setSelection(selection: string): void;
   makeAmove(move: Move): void;
   perspective: string;
+  colorScheme?: ColorScheme;
 }
 
 // they use special presets to determine positiions on board. transform is hardcoded
@@ -59,7 +60,6 @@ function boardNotationToIndices(pos: string, perspective: string) {
   // (h1) -> index 0
   // (h8) -> index 7
 
-
   let x = 0;
   for (let i = 0; i < FILES.length; i++) {
     if (FILES[i] == pos[0]) {
@@ -80,7 +80,6 @@ function boardNotationToIndices(pos: string, perspective: string) {
 /** Calculates the possible moves for the selected piece, returning an SVG rendering them all as an overlay on the board. */
 
 function PromotionPiece(i: number, move: Move, onClick: (move: Move) => void) {
-
   if (move.promotion) {
     let piece = move.promotion;
     let color = move.color;
@@ -95,7 +94,6 @@ function PromotionPiece(i: number, move: Move, onClick: (move: Move) => void) {
       ></img>
     );
   }
-
 }
 
 function getPossibleMoves(
@@ -172,8 +170,6 @@ function LastMoveHints(board: Chess, perspective: string) {
   }
   return hints;
 }
-
-
 
 function Labels(perspective: string, light: string, dark: string) {
   if (perspective === "black") {
@@ -316,9 +312,9 @@ function mouseDown(event: MouseEvent) {
   // console.log("pos: " + event.clientX + " " + event.clientY);
 }
 
-function mouseMove(event: MouseEvent) { }
+function mouseMove(event: MouseEvent) {}
 
-function mouseUp(event: MouseEvent) { }
+function mouseUp(event: MouseEvent) {}
 
 interface PromotionParams {
   board: Chess;
@@ -326,23 +322,13 @@ interface PromotionParams {
   makeAmove(move: Move): void;
 }
 
-
 export default function NewBoard(props: ChessBoardProps) {
-
   const userInfo = useContext(UserInfoContext);
 
-  let light = "white";
-  let dark = "#fca311";
-
-  if (userInfo) {
-    if (userInfo.user.boardLightColor) {
-      light = userInfo.user.boardLightColor;
-    }
-    if (userInfo.user.boardDarkColor) {
-      dark = userInfo.user.boardDarkColor;
-    }
-  }
-
+  let light =
+    props.colorScheme?.light ?? userInfo?.user?.boardLightColor ?? "white";
+  let dark =
+    props.colorScheme?.dark ?? userInfo?.user?.boardDarkColor ?? "#fca311";
 
   const boardRef = useRef<HTMLDivElement>(null);
   const [isPromotion, setIsPromotion] = useState<boolean>(false);
@@ -375,14 +361,12 @@ export default function NewBoard(props: ChessBoardProps) {
     }
   }
 
-
-
   function PromotionModal(props: PromotionParams) {
     let allMoves = props.board.moves({ verbose: true }) as Move[];
 
     const makeMove = (move: Move) => {
       props.makeAmove(move);
-      setIsPromotion(false)
+      setIsPromotion(false);
       setPromotionSquare("");
     };
 
@@ -412,8 +396,7 @@ export default function NewBoard(props: ChessBoardProps) {
     // this should be refactored /combined with other methods to support dragging a piece to the target location
     // setSelection / makeMove will be passed in as props
 
-    if (isPromotion)
-      return;
+    if (isPromotion) return;
 
     const r = windowToBoardCoords(boardRef.current!, {
       x: e?.clientX,
@@ -447,7 +430,6 @@ export default function NewBoard(props: ChessBoardProps) {
         availableMoves[i].from === props.selection &&
         availableMoves[i].to === boardNotation
       ) {
-
         if (availableMoves[i].san.includes("=")) {
           setIsPromotion(true);
           setPromotionSquare(availableMoves[i].to);
@@ -460,14 +442,12 @@ export default function NewBoard(props: ChessBoardProps) {
       }
     }
 
-
-
     const color = props.isPlayerWhite ? "w" : "b";
 
     // (selection is same as previous || the place on board is empty || the place on the board is other player's color)
     if (
       convertIndicesToBoardNotation(indices, props.perspective) ===
-      props.selection ||
+        props.selection ||
       board[indices.j][indices.i] === null ||
       board[indices.j][indices.i]?.color !== color
     ) {
@@ -495,7 +475,13 @@ export default function NewBoard(props: ChessBoardProps) {
         board={props.board}
         perspective={props.perspective}
       >
-        {isPromotion && <PromotionModal selection={props.selection} board={props.board} makeAmove={props.makeAmove} />}
+        {isPromotion && (
+          <PromotionModal
+            selection={props.selection}
+            board={props.board}
+            makeAmove={props.makeAmove}
+          />
+        )}
         {pieces && pieces}
         {possibleMoves && possibleMoves}
         {Labels(props.perspective, dark, light)}

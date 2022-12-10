@@ -38,3 +38,13 @@ export function postJSON(url: string, payload: any) {
     },
   });
 }
+
+export function putJSON(url: string, payload: any) {
+  return fetch(url, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
