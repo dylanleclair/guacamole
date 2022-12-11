@@ -3,8 +3,7 @@ import { buffer } from "micro";
 import Stripe from "stripe";
 import User from "../../../models/User";
 
-const endpointSecret =
-  "whsec_f6cdd8ac52b3b4853d7d70f02718e80dca4b2dd9ff9e6e4f2b9c45571d234179";
+const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET!;
 
 export const config = {
   api: {
