@@ -1,4 +1,3 @@
-import { getSession } from "next-auth/react";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import "../../../lib/databaseConnection";
@@ -7,20 +6,15 @@ import User, { type IUser } from "../../../models/User";
 import { unstable_getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 
-enum ERROR_CODE {
-  success,
-  fail,
-}
-
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<IUser | ERROR_CODE>
+  res: NextApiResponse<IUser | string>
 ) {
   const session = await unstable_getServerSession(req, res, authOptions);
   const { method } = req;
 
   if (!session) {
-    res.status(401).json(ERROR_CODE.fail);
+    res.status(401).json("You must be authorized to make this request.");
     return;
   }
 
@@ -31,26 +25,27 @@ export default async function handler(
         console.log(user);
         res.status(200).json(user);
       } catch (error) {
-        res.status(400).json(ERROR_CODE.fail);
+        res.status(400).json("Unable to find user " + error);
       }
       break;
     case "POST":
       try {
-        const user: IUser = await User.create(req.body);
-        res.status(201).json(ERROR_CODE.fail);
+        await User.create(req.body);
+        res.status(201).json("User created successfully");
       } catch (error) {
-        res.status(400).json(ERROR_CODE.fail);
+        res.status(400).json("Unable to create user " + error);
       }
       break;
     case "PUT":
       try {
         await User.updateOne({ _id: session.user?.id }, req.body);
-        res.status(200).json(ERROR_CODE.fail);
+        res.status(200).json("User updated successfully");
       } catch (error) {
-        res.status(400).json(ERROR_CODE.fail);
+        res.status(400).json("Unable to update user " + error);
       }
+      break;
     default:
-      res.status(400).json(ERROR_CODE.fail);
+      res.status(400).json("Unsupported operation");
       break;
   }
 }

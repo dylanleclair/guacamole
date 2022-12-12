@@ -9,18 +9,17 @@ export interface UserInfoProviderProps {
 }
 
 export interface UserInfo {
-  user: IUser;
+  user?: IUser;
   setUser(user: IUser): void;
 }
 
-export const UserInfoContext = createContext<UserInfo | null>(null);
+export const UserInfoContext = createContext<UserInfo>({ setUser: () => {} });
 
 export function UserInfoProvider(props: UserInfoProviderProps) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<IUser>();
 
   useEffect(() => {
-    console.log(session);
     if (session && !user) {
       request<IUser>("/api/user").then((result) => {
         if (result) {
@@ -34,10 +33,10 @@ export function UserInfoProvider(props: UserInfoProviderProps) {
 
   const setUserCallback = (user: IUser) => setUser(user);
 
-  if (!user) return props.children; // return normal data
+  if (status === "loading" || (session && !user)) return <CircularLoader />;
   return (
     <UserInfoContext.Provider value={{ user: user, setUser: setUserCallback }}>
       {props.children}
-    </UserInfoContext.Provider >
+    </UserInfoContext.Provider>
   );
 }

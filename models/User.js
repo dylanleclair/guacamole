@@ -15,6 +15,7 @@ var UserSchema = new mongoose_1["default"].Schema({
   premiumMember: Boolean,
   boardLightColor: String,
   boardDarkColor: String,
+  stripeCustomerId: String,
 });
 exports["default"] =
   mongoose_1["default"].models.User ||
