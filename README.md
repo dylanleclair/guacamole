@@ -69,3 +69,10 @@ $ docker ps -a : show all process
 $ docker down : stop multi-container
 
 $ docker-compose up -d --build : rebuild containers (if you change config, youll want to run this)
+
+## Setting up Stripe integration (locally):
+- Install the [Stripe CLI](https://stripe.com/docs/stripe-cli)
+- Login to the Stripe account being used and corresponding to your Stripe ENV variables using `stripe login` (note you may need to specify the path to the executable like `C:/path-to-executable/stripe.exe login` if your system can't recognize the stripe command)
+- Run `stripe listen --forward-to http://localhost:3000/api/webhooks/stripe`
+- Now stripe will forward requests to our local webhook endpoint so that our backend can respond accordingly. 
+- Note that a stripe customer is created on creation of a new Cascadia user. Thus, old users that were not created under this integration should either be deleted or manually create a stripe customer and add the stripeCustomerId column for the Cascadia user.
