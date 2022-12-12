@@ -356,12 +356,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {state.matchId === "" && (
-        <MatchFinder
-          onFindMatch={onMatchRequest}
-          match_state={state.match_state}
-        />
-      )}
+      {signin}
 
       <Modal
         show={state.match_state === MATCH_STATES.MATCH_END}
@@ -397,7 +392,15 @@ const Home: NextPage = () => {
             <div>Match: {state.matchId}</div>
 
             <div>Player color: {state.isPlayerWhite ? "white" : "black"}</div>
-            <PlayerProfile user={state.user} />
+            {state.matchId === "" && (
+            <MatchFinder
+              onFindMatch={onMatchRequest}
+              match_state={state.match_state}
+            />
+            )}
+            <PlayerProfile
+              user={state.user}
+            />
             {state && (
               <ChessBoard
                 board={state.board}
@@ -435,9 +438,11 @@ const Home: NextPage = () => {
   );
 };
 
-function PlayerProfile(props: { user: IUser | null }) {
-  if (props.user) {
-    let elo = props.user.elo ? props.user.elo : 5000;
+
+function PlayerProfile(props: {user: IUser | null})
+{
+  if (props.user){
+    let elo = (props.user.elo) ? props.user.elo : "Unranked";
 
     return (
       <div className="row w-100 bg-dark text-white">
@@ -445,22 +450,9 @@ function PlayerProfile(props: { user: IUser | null }) {
           <img src={props.user.image} className="img-fluid" />
         </div>
         <div className="col-10">
-          <h1 className="display-6">
-            {props.user.name}{" "}
-            <img
-              src="diamond.png"
-              css={css`
-                width: 1em;
-                height: 1em;
-              `}
-              className="diamond-icon"
-            />
-            <span
-              css={css`
-                font-size: 0.7em;
-              `}
-            >{` (${elo})`}</span>
-          </h1>
+          <h1 className="display-6">{props.user.name} <span css={css`font-size : .7em;`}>{` (${elo})`}</span>
+          <img src="diamond.png" css={css`width: 1em; height: 1em;`} className="diamond-icon"/></h1>
+
         </div>
       </div>
     );
