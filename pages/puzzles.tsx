@@ -5,17 +5,15 @@ import Image from "next/image";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { IMatch } from "../models/Match";
 import { useEffect, useState } from "react";
-import { Chess, Move } from "chess.js"
-
-
+import { Chess, Move } from "chess.js";
 
 import ChessBoard from "../components/chessboard/ChessBoard";
 
 import ChessUser, { IUser } from "../models/User";
 import MatchFinder from "../components/MatchFinder/MatchFinder";
 
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import Puzzle from "../models/Puzzle";
 import { css } from "@emotion/react";
 
@@ -23,9 +21,9 @@ import { css } from "@emotion/react";
  * States of play. Used to decide what to render.
  */
 enum PUZZLE_STATES {
-  PUZZLE_INIT,    // the user is not in a match and is not waiting for one
+  PUZZLE_INIT, // the user is not in a match and is not waiting for one
   PUZZLE_SOLVING, // the user is in a match & is playing
-  PUZZLE_END      // the user has just ended a match (won, lost or drew)
+  PUZZLE_END, // the user has just ended a match (won, lost or drew)
 }
 
 interface PuzzleData {
@@ -41,7 +39,7 @@ interface PuzzleData {
 
 // Loading in data of type Puzzle,
 // Fetch that, and package it up as that data type.
-// Reply with a random puzzle, and I will get it. 
+// Reply with a random puzzle, and I will get it.
 interface PuzzleInfo {
   start_position: string;
   expected_line: string[];
@@ -55,23 +53,20 @@ const defaultProps = {
   user: null,
   puzzle_state: PUZZLE_STATES.PUZZLE_INIT,
   puzzle_index: 0,
-  perspective: "white"
-}
+  perspective: "white",
+};
 
 let isInitialLoad = true;
 
-
 function fetchPuzzle(): PuzzleInfo {
-
   return {
-    start_position: '8/8/8/8/8/2k5/3r4/2K5 w - - 26 127',
-    expected_line: ['Kb1', 'Rh2', 'Ka1', 'Kb3', 'Kb1', 'Rh1#']
-  }
-
+    start_position: "8/8/8/8/8/2k5/3r4/2K5 w - - 26 127",
+    expected_line: ["Kb1", "Rh2", "Ka1", "Kb3", "Kb1", "Rh1#"],
+  };
 }
 
 /** Used to hide / reveal the state of the puzzle. */
-function Solution(props: { expected_line: string[], puzzle_index: number }) {
+function Solution(props: { expected_line: string[]; puzzle_index: number }) {
   return (
     <div className="w-100 mt-4">
       <h3>Solution</h3>
@@ -82,39 +77,37 @@ function Solution(props: { expected_line: string[], puzzle_index: number }) {
 }
 
 function PlayerToMove(props: { isPlayerWhite: boolean }) {
-
-
   return (
     <div className="my-2 d-flex gap-3">
-      <h4 className="" css={css`line-height: 1.4em;`}>Player to Move</h4>
+      <h4
+        className=""
+        css={css`
+          line-height: 1.4em;
+        `}
+      >
+        Player to Move
+      </h4>
       <img
         css={css`
-              width: 30px;
-              height: 30px;
-              background-color: ${props.isPlayerWhite ? 'white' : 'black'};
-              border-radius: 0.5em;
-              filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.2));
-            `}
+          width: 30px;
+          height: 30px;
+          background-color: ${props.isPlayerWhite ? "white" : "black"};
+          border-radius: 0.5em;
+          filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.2));
+        `}
       />
     </div>
   );
 }
-
-
 
 const Home: NextPage = () => {
   const { data: session } = useSession();
   const [state, setState] = useState<PuzzleData>(defaultProps);
 
   useEffect(() => {
-
     // load the match id from the database
     if (state.puzzle_state === PUZZLE_STATES.PUZZLE_INIT) {
-
-
       getPuzzle().then((puzzle) => {
-
-
         console.log(puzzle);
 
         console.log("parsing puzzle");
@@ -130,52 +123,42 @@ const Home: NextPage = () => {
           puzzle_index: 1,
           board: start_board,
           expected_line: expected_line,
-          isPlayerWhite: start_board.turn() === 'w' ? true : false
+          isPlayerWhite: start_board.turn() === "w" ? true : false,
         });
-
-
-
       });
-
     }
 
-    if (state.puzzle_state === PUZZLE_STATES.PUZZLE_SOLVING && state.puzzle_index % 2 === 0) {
-
-
+    if (
+      state.puzzle_state === PUZZLE_STATES.PUZZLE_SOLVING &&
+      state.puzzle_index % 2 === 0
+    ) {
       // if solving and the move is wrong, undo the move.
       console.log("HISTORY: ", state.board.history());
-      if (state.board.history()[state.board.history().length - 1] !== state.expected_line[state.puzzle_index - 1]) {
-        console.log("wrong move!!!")
+      if (
+        state.board.history()[state.board.history().length - 1] !==
+        state.expected_line[state.puzzle_index - 1]
+      ) {
+        console.log("wrong move!!!");
         let s = new Chess();
         if (s.loadPgn(state.board.pgn())) {
-
-
-
-          if (s.undo()) // undo the last move
-          {
+          if (s.undo()) {
+            // undo the last move
             // console.log("undoing move!!!");
             setTimeout(() => {
-              setState(
-                {
-                  ...state,
-                  board: s,
-                  puzzle_index: state.puzzle_index - 1,
-                  selection: ""
-                }
-              );
+              setState({
+                ...state,
+                board: s,
+                puzzle_index: state.puzzle_index - 1,
+                selection: "",
+              });
             }, 300);
-
           }
         }
 
-
         return;
-
       }
 
-
-
-      // if solving, and player has made correct move, 
+      // if solving, and player has made correct move,
       // make the next move in the line.
 
       // first check to see if puzzle complete
@@ -186,7 +169,7 @@ const Home: NextPage = () => {
           // puzzle_index: state.puzzle_index + 1,
           puzzle_state: PUZZLE_STATES.PUZZLE_END,
         });
-        return
+        return;
       }
 
       let s = new Chess();
@@ -195,26 +178,18 @@ const Home: NextPage = () => {
 
       // make the next move in the puzzle
       if (result) {
-
         setTimeout(() => {
-          setState(
-            {
-              ...state,
-              board: s,
-              puzzle_index: state.puzzle_index + 1,
-              selection: ""
-            }
-          );
+          setState({
+            ...state,
+            board: s,
+            puzzle_index: state.puzzle_index + 1,
+            selection: "",
+          });
         }, 300);
-
       }
-
     }
 
-    return () => {
-
-    };
-
+    return () => {};
   }, [state]);
 
   /**
@@ -223,8 +198,8 @@ const Home: NextPage = () => {
   function flipBoard() {
     setState({
       ...state,
-      perspective: (state.perspective === "white") ? "black" : "white",
-    })
+      perspective: state.perspective === "white" ? "black" : "white",
+    });
   }
 
   /**
@@ -235,25 +210,20 @@ const Home: NextPage = () => {
     let s = new Chess(state.board.fen());
     let result = s.move(moveToMake);
 
-    // this makes sure that the move being sent to server is legal. 
+    // this makes sure that the move being sent to server is legal.
     // this is not really necessary, since the server will also validate before updating the match.
     if (result) {
       // check if move is in the expected line
 
-
-      console.log(state.expected_line)
+      console.log(state.expected_line);
 
       setState({
         ...state,
         board: s,
-        puzzle_index: state.puzzle_index + 1
+        puzzle_index: state.puzzle_index + 1,
       });
-
-
-
     }
-
-  };
+  }
 
   // const moves_cmpnt = state.moves?.map((str, i) => <li key={i}>{str}</li>)
 
@@ -267,14 +237,12 @@ const Home: NextPage = () => {
 
     // Fetch from the page
 
-
     //https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-    const puzzleFetch = fetch('/api/puzzles')
+    const puzzleFetch = fetch("/api/puzzles")
       .then((response) => response.json())
-      .then((data) => data as PuzzleInfo)
+      .then((data) => data as PuzzleInfo);
 
-    return puzzleFetch
-
+    return puzzleFetch;
   }
 
   const handleClose = () => {
@@ -365,7 +333,13 @@ const Home: NextPage = () => {
   );
 };
 
-
-
+export async function getStaticProps() {
+  return {
+    props: {
+      protected: true,
+      premium: true,
+    },
+  };
+}
 
 export default Home;

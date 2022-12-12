@@ -12,6 +12,7 @@ export interface IUser extends mongoose.Document {
   currentMatch?: Object;
   boardLightColor?: string;
   boardDarkColor?: string;
+  stripeCustomerId?: string;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -22,6 +23,7 @@ const UserSchema = new mongoose.Schema({
   premiumMember: Boolean,
   boardLightColor: String,
   boardDarkColor: String,
+  stripeCustomerId: String,
 });
 
 export default mongoose.models.User ||
