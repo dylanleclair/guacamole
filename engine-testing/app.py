@@ -42,11 +42,15 @@ async def sendfen() -> Response:
         2. top 3
         3. wdl (win, draw, loss)
 
+    Notes
+    -----
+    - You can specify a skill level using a 'skill_level' key (int) in the request JSON
+
     Returns
     -------
     Response
         A JSON response with the calculated best move, top 3 and wdl
-        
+
     Example
     -------
     (Assumes server is running on port 8228)
@@ -54,7 +58,8 @@ async def sendfen() -> Response:
     import requests
     r = requests.post( 
         "http://localhost:8228/fen", 
-        json={ "fen":"6qk/8/5P1p/8/8/6QP/5PP1/4R1K1 w - - 0 1"}
+        json={ "fen":"6qk/8/5P1p/8/8/6QP/5PP1/4R1K1 w - - 0 1",
+        "skill_level": 3}
     )
     r.json() # {'move': 'e1e8',
                 'top_3': [
@@ -68,6 +73,11 @@ async def sendfen() -> Response:
     try:
         content = request.json["fen"]
         board = chess.Board(content)
+        try:
+            skill_level = int(request.json.get("skill_level", 5 )) #defaults to very hard
+        except ValueError:
+            skill_level = 5
+        engine.configure({"Skill Level":skill_level})
         if board.is_valid():
             analysis = engine.analyse(board, chess.engine.Limit(time=0.1))
             wdl = analysis["score"].relative.wdl()

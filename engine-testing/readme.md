@@ -55,7 +55,8 @@ import requests
 
 port = 8228
 r = requests.post(f"http://localhost:{port}/fen",
-    json={ "fen":"6qk/8/5P1p/8/8/6QP/5PP1/4R1K1 w - - 0 1"}
+    json={ "fen":"6qk/8/5P1p/8/8/6QP/5PP1/4R1K1 w - - 0 1",
+    "skill_level": 3}
 )
 r.json() """{'move': 'e1e8',
             'top_3': [
@@ -102,11 +103,6 @@ graph
     sf[stockfish] --process recieved fen-->sf[stockfish]
     r[engine started] <--HTTP Response/requests-->/fen
 ```
-
-## Todo
-
-- [ ] Load balance the initial container with 3 replicas
-  - [ ] Allow ability to set ELO from CLI and do seperated architecture for tiered bots
 
 Overall architecture:
 
