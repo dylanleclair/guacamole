@@ -1,6 +1,6 @@
 import { Chess, Move } from "chess.js";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import ChessBoard from "../chessboard/ChessBoard";
 import { css } from "@emotion/react";
@@ -34,9 +34,11 @@ interface ComputerState {
   component_state: STATES;
   elo: number;
   matchData: MatchMetadata;
+  skillLevel: number;
 }
 
 const defaultState = {
+  skillLevel: 1,
   board: new Chess(),
   selection: "",
   isPlayerWhite: true,
@@ -74,6 +76,32 @@ function checkGameOver(board: Chess): MatchMetadata {
 function fetchBestMove(fen: string): Promise<string> | null {
   try {
     let result = postJSON("/api/computer", { fen: fen })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error();
+        }
+      })
+      .then((data) => {
+        // parse the move!!!
+        if (data.move) {
+          // console.log("Recommended move: ", data.move);
+          return data.move;
+        }
+      });
+
+    return result;
+  } catch (err) {
+    console.log(err);
+  }
+
+  return null;
+}
+
+function fetchCPUMove(fen: string, skill: number): Promise<string> | null {
+  try {
+    let result = postJSON("/api/computer", { fen: fen , skill_level: skill})
       .then((response) => {
         if (response.ok) {
           return response.json();
@@ -156,7 +184,7 @@ export default function ComputerBoard(props: ComputerProps) {
     }
 
     if (state.component_state === STATES.WAITING) {
-      let computerMove = fetchBestMove(state.board.fen());
+      let computerMove = fetchCPUMove(state.board.fen(), state.skillLevel);
 
       let s = new Chess();
       s.loadPgn(state.board.pgn());
@@ -236,6 +264,7 @@ export default function ComputerBoard(props: ComputerProps) {
   function handleClose() {
     // reset state!!
     setState({
+      skillLevel: 1,
       board: new Chess(),
       selection: "",
       isPlayerWhite: true,
@@ -245,10 +274,19 @@ export default function ComputerBoard(props: ComputerProps) {
       matchData: { winner: "", method: "" },
     });
   }
+  function updateSkillLevel(e: React.FormEvent<HTMLInputElement>)
+  {
+      setState({...state,
+      skillLevel:  parseInt(e.currentTarget.value) });
+  }
 
   return (
     <div className="w-100 card my-3">
       <div className="card-body d-flex flex-col justify-content-center align-items-center">
+
+    <h3>CPU Skill Level: {state.skillLevel} </h3>
+            <input type="range" className="form-range" min="1" max="5" value={state.skillLevel} id="playerSkillLevel" onChange={updateSkillLevel} />
+
         {state && (
           <ChessBoard
             board={state.board}
@@ -271,11 +309,8 @@ export default function ComputerBoard(props: ComputerProps) {
             {state.matchData.winner} wins by {state.matchData.method}.
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
             <Button variant="primary" onClick={handleClose}>
-              Save Changes
+            Close
             </Button>
           </Modal.Footer>
         </Modal>

@@ -380,11 +380,8 @@ const Home: NextPage = () => {
           {state.matchData.winner} wins by {state.matchData.method}.
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
           <Button variant="primary" onClick={handleClose}>
-            Save Changes
+          Close
           </Button>
         </Modal.Footer>
       </Modal>

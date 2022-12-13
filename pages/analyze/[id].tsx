@@ -52,17 +52,6 @@ const Home: NextPage = () => {
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        {/* <Modal show={state.puzzle_state === PUZZLE_STATES.PUZZLE_END} onHide={handleClose}>
-                <Modal.Header closeButton>
-                <Modal.Title>Puzzle complete!</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>You've solved the puzzle! Dismiss to continue to another.</Modal.Body>
-                <Modal.Footer>
-                <Button variant="primary" onClick={handleClose}>
-                    Close
-                </Button>
-                </Modal.Footer>
-            </Modal> */}
         <main className="container d-flex flex-col justify-content-center align-items-center">
           <h1 className="display-2">Post Game Analysis</h1>
 
