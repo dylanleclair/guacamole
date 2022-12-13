@@ -100,12 +100,4 @@ export async function getServerSideProps() {
   };
 }
 
-// //not sure if this page is being used .. workaround
-// export async function getStaticPaths() {
-//   return {
-//     paths: [],
-//     fallback: false,
-//   };
-// }
-
 export default Home;
