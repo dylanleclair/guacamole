@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 
-import { useSession, } from "next-auth/react";
 import { useState } from "react";
 
 import Modal from "react-bootstrap/Modal";
@@ -17,34 +16,11 @@ enum ANALYZE_STATES {
   END, // the user has just ended a match (won, lost or drew)
 }
 
-// interface AnalysisData {
-//     board: Chess;
-//     match_pgn: string;
-//     selection: string;
-//     isPlayerWhite: boolean;
-//     user: IUser | null;
-//     analysis_state: ANALYZE_STATES;
-//     move_index: number;
-//     perspective: string;
-// }
-
-// const defaultProps = {
-//     board: new Chess(),
-//     match_pgn: "",
-//     selection: "",
-//     isPlayerWhite: true,
-//     user: null,
-//     analysis_state: ANALYZE_STATES.INIT,
-//     move_index: 0,
-//     perspective: "white"
-// }
-
 function fetchPGN() {
   return "1. e3 c5 2. Nf3 Nc6 3. Bb5 Qc7 4. Bxc6 Qxc6 5. Nc3";
 }
 
 const Home: NextPage = () => {
-  const { data: session } = useSession();
 
   const [pgn, setPGN] = useState<string>("");
 
