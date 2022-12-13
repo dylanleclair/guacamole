@@ -18,9 +18,6 @@ A live service chess app with additional analysis and ai gameplay provided by st
    - you can go to http://localhost:3000 to see the default page
    - I've also written a page that has a preview of what the chess board might look like: http://localhost:3000/match
 
-## Project specific stuff
-
-Chess library we can build off of: https://github.com/jhlywa/chess.js/blob/master/README.md
 
 ## Project Stack
 
@@ -31,6 +28,7 @@ Chess library we can build off of: https://github.com/jhlywa/chess.js/blob/maste
 |Mongoose| Database connection library | [Website](https://mongoosejs.com/) |
 |NextAuth.js| Github auth for creating users | [Website](https://next-auth.js.org/) |
 | SocketIo | Websocket implementation for real-time comunication between players | [Website](https://socket.io/) |
+| ChessJS | Implementation of chess logic client-side | [Website](https://github.com/jhlywa/chess.js) | 
 
 Additionally `engine-testing` is a microservice for doing analysis. It's an HTTP wrapper in python that wraps [stockfish](https://stockfishchess.org/) so that the main nextJS service can communicate with it.
 
