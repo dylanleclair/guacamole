@@ -85,13 +85,13 @@ export default async function handler(
           // check if the game has been surrendered
           if (move.includes("resigns")) {
             console.log("PLAYER HAS RESIGNED:", move);
-            let winner = move.split(" ")[0];
+            let loser = move.split(" ")[0]; // the color in the string resigns, so they are the loser!
             // if white, player1 wins
             // if black, player2 wins
-            let winnerId = m.player1id;
-            if (winner === "black") {
-              if (m.player2id) {
-                winnerId = m.player2id;
+            let winnerId = m.player2id;
+            if (loser === "black") {
+              if (m.player1id) {
+                winnerId = m.player1id;
               }
             }
 
