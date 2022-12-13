@@ -5,68 +5,95 @@ import { Button, Modal } from "react-bootstrap";
 import ChessBoard from "../chessboard/ChessBoard";
 import { css } from "@emotion/react";
 
-import { postJSON } from '../../utils/networkingutils'
+import { postJSON } from "../../utils/networkingutils";
 
 /**
  * States of play. Used to decide what to render.
  */
 enum STATES {
-    INIT,    // the user is not in a match and is not waiting for one
-    PLAYING, // the user is in a match & is playing,
-    WAITING, // the user is waiting for the computer to make a move
-    END      // the user has just ended a match (won, lost or drew)
+  INIT, // the user is not in a match and is not waiting for one
+  PLAYING, // the user is in a match & is playing,
+  WAITING, // the user is waiting for the computer to make a move
+  END, // the user has just ended a match (won, lost or drew)
 }
 
 interface ComputerProps {
-    elo: number;
+  elo: number;
+}
+
+interface MatchMetadata {
+  winner: string;
+  method: string;
 }
 
 interface ComputerState {
-    board: Chess;
-    selection: string;
-    isPlayerWhite: boolean;
-    perspective: string;
-    component_state: STATES;
-    elo: number;
+  board: Chess;
+  selection: string;
+  isPlayerWhite: boolean;
+  perspective: string;
+  component_state: STATES;
+  elo: number;
+  matchData: MatchMetadata;
 }
 
 const defaultState = {
-    board: new Chess(),
-    selection: "",
-    isPlayerWhite: true,
-    perspective: "white",
-    component_state: STATES.INIT,
-    elo: 1350,
+  board: new Chess(),
+  selection: "",
+  isPlayerWhite: true,
+  perspective: "white",
+  component_state: STATES.INIT,
+  elo: 1350,
+  matchData: { winner: "", method: "" },
 };
 
+function checkGameOver(board: Chess): MatchMetadata {
+  let matchData = { winner: "", method: "" };
+
+  if (board.isGameOver()) {
+    let matchData = { winner: "", method: "" };
+    // determine if draw or win & how
+    if (board.isCheckmate()) {
+      matchData.method = "checkmate";
+      matchData.winner = board.turn() === "w" ? "black" : "white";
+    } else {
+      matchData.winner = "nobody";
+      matchData.method = " by ";
+      if (board.isInsufficientMaterial()) {
+        matchData.method += "insufficient material";
+      } else if (board.isStalemate()) {
+        matchData.method += "stalemate";
+      } else if (board.isThreefoldRepetition()) {
+        matchData.method += "repetition";
+      }
+    }
+  }
+  return matchData;
+}
 
 function fetchBestMove(fen: string): Promise<string> | null {
+  try {
+    let result = postJSON("/api/computer", { fen: fen })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error();
+        }
+      })
+      .then((data) => {
+        // parse the move!!!
+        if (data.move) {
+          // console.log("Recommended move: ", data.move);
+          return data.move;
+        }
+      });
 
-    try {
-        let result = postJSON('/api/computer', { fen: fen }).then((response) => {
-            if (response.ok) {
+    return result;
+  } catch (err) {
+    console.log(err);
+  }
 
-                return response.json();
-
-            } else {
-                throw new Error();
-            }
-        }).then((data) => {
-            // parse the move!!!
-            if (data.move) {
-                // console.log("Recommended move: ", data.move);
-                return data.move;
-            }
-        });
-
-        return result;
-    } catch (err) {
-        console.log(err);
-    }
-
-    return null;
-
-
+  return null;
 }
 
 /**
@@ -76,161 +103,181 @@ function fetchBestMove(fen: string): Promise<string> | null {
  * @returns Emotion/React component !!!
  */
 export default function ComputerBoard(props: ComputerProps) {
-    const [state, setState] = useState<ComputerState>(defaultState);
+  const [state, setState] = useState<ComputerState>(defaultState);
 
+  // basically all we need to do is fetch an endpoint. as long as we have ELO & other settings, we don't need anything else.
 
-    // basically all we need to do is fetch an endpoint. as long as we have ELO & other settings, we don't need anything else.
+  useEffect(() => {
+    // load the match id from the database
+    if (state.component_state === STATES.INIT) {
+      // fetch the PGN of the match
 
-    useEffect(() => {
-        // load the match id from the database
-        if (state.component_state === STATES.INIT) {
-            // fetch the PGN of the match
+      // coinflip for white/black pieces
+      let coinflip = Math.round(Math.random()) === 1 ? true : false;
 
-            // coinflip for white/black pieces
-            let coinflip = Math.round(Math.random()) === 1 ? true : false;
-
-
-            if (coinflip) {
-                setState({
-                    ...state,
-                    component_state: STATES.PLAYING,
-                    selection: "",
-                    isPlayerWhite: coinflip,
-                    perspective: 'white',
-                    elo: 1350,
-                });
-            } else {
-                setState({
-                    ...state,
-                    component_state: STATES.WAITING,
-                    selection: "",
-                    isPlayerWhite: coinflip,
-                    perspective: 'black',
-                    elo: 1350,
-                });
-            }
-
-        }
-
-        if (state.component_state === STATES.WAITING) {
-            let computerMove = fetchBestMove(state.board.fen());
-
-            let s = new Chess();
-            s.loadPgn(state.board.pgn());
-
-            if (computerMove) {
-
-                computerMove.then((move) => {
-                    s.move(move);
-                    setState({
-                        ...state,
-                        board: s,
-                        component_state: STATES.PLAYING,
-                        elo: 1350,
-                    });
-                })
-
-
-            } else {
-                console.log("something has gone horribly wrong. could not get CPU move.");
-            }
-
-
-        }
-
-        return () => { };
-    }, [state]);
-
-    /**
-     * Flips the board perspective.
-     */
-    function flipBoard() {
+      if (coinflip) {
         setState({
-            ...state,
-            perspective: state.perspective === "white" ? "black" : "white",
+          ...state,
+          component_state: STATES.PLAYING,
+          selection: "",
+          isPlayerWhite: coinflip,
+          perspective: "white",
+          elo: 1350,
         });
+      } else {
+        setState({
+          ...state,
+          component_state: STATES.WAITING,
+          selection: "",
+          isPlayerWhite: coinflip,
+          perspective: "black",
+          elo: 1350,
+        });
+      }
     }
 
-    /**
-     * Sends the move the player wants to make to the server for processing.
-     * @param moveToMake the Move (from chess.js) that the player wants to make
-     */
-    function makeMove(moveToMake: Move) {
-        let s = new Chess();
-        s.loadPgn(state.board.pgn());
-        let result = s.move(moveToMake);
+    if (state.component_state === STATES.WAITING) {
+      let computerMove = fetchBestMove(state.board.fen());
 
-        if (result) {
-            setState(
-                {
-                    ...state,
-                    board: s,
-                    component_state: STATES.WAITING,
-                }
-            )
-        }
+      let s = new Chess();
+      s.loadPgn(state.board.pgn());
+
+      if (computerMove) {
+        computerMove.then((move) => {
+          s.move(move);
+
+          let metadata = checkGameOver(s);
+
+          setState({
+            ...state,
+            board: s,
+            component_state: (s.isGameOver()) ? STATES.END : STATES.PLAYING,
+            elo: 1350,
+            matchData: metadata,
+          });
+        });
+      } else {
+        console.log(
+          "something has gone horribly wrong. could not get CPU move."
+        );
+      }
     }
 
-    /**
-     * Select piece
-     */
-    function selectPiece(selection: string) {
-        if (state.component_state === STATES.PLAYING) {
-            setState({
-                ...state,
-                selection: selection,
-            });
-        }
+    return () => {};
+  }, [state]);
+
+  /**
+   * Flips the board perspective.
+   */
+  function flipBoard() {
+    setState({
+      ...state,
+      perspective: state.perspective === "white" ? "black" : "white",
+    });
+  }
+
+  /**
+   * Sends the move the player wants to make to the server for processing.
+   * @param moveToMake the Move (from chess.js) that the player wants to make
+   */
+  function makeMove(moveToMake: Move) {
+    let s = new Chess();
+    s.loadPgn(state.board.pgn());
+    let result = s.move(moveToMake);
+
+    if (result) {
+    
+      let metadata = checkGameOver(s);
+
+      setState({
+        ...state,
+        board: s,
+        component_state: (s.isGameOver()) ? STATES.END : STATES.WAITING,
+        matchData: metadata,
+      });
     }
-    <div>
-        <h1>History</h1>
-        <div>{state.board.history().join(" ")}</div>
-    </div>
+  }
 
-    function handleClose() {
-        // reset state!!
+  /**
+   * Select piece
+   */
+  function selectPiece(selection: string) {
+    if (state.component_state === STATES.PLAYING) {
+      setState({
+        ...state,
+        selection: selection,
+      });
     }
+  }
+  <div>
+    <h1>History</h1>
+    <div>{state.board.history().join(" ")}</div>
+  </div>;
 
-    return (
+  function handleClose() {
+    // reset state!!
+    setState({
+      board: new Chess(),
+      selection: "",
+      isPlayerWhite: true,
+      perspective: "white",
+      component_state: STATES.INIT,
+      elo: 1350,
+      matchData: { winner: "", method: "" },
+    });
+  }
 
-        <div className="w-100 card my-3">
-            <div className="card-body d-flex flex-col justify-content-center align-items-center">
+  return (
+    <div className="w-100 card my-3">
+      <div className="card-body d-flex flex-col justify-content-center align-items-center">
+        {state && (
+          <ChessBoard
+            board={state.board}
+            perspective={state.perspective}
+            isPlayerWhite={state.isPlayerWhite}
+            selection={state.selection}
+            makeAmove={makeMove}
+            setSelection={selectPiece}
+          />
+        )}
 
-                {state && (
-                    <ChessBoard
-                        board={state.board}
-                        perspective={state.perspective}
-                        isPlayerWhite={state.isPlayerWhite}
-                        selection={state.selection}
-                        makeAmove={makeMove}
-                        setSelection={selectPiece}
-                    />
-                )}
-                <div className="w-100 d-flex justify-content-between mt-3">
-                    <div>
-                        <button
-                            className="btn btn-sm btn-dark mr-2"
-                            onClick={flipBoard}
-                        >
-                            <i className="bi bi-arrow-repeat"></i> Flip Board
-                        </button>
-                    </div>
+        <Modal
+          show={state.component_state === STATES.END}
+          onHide={handleClose}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Match ended</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {state.matchData.winner} wins by {state.matchData.method}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleClose}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-                    <div className="d-flex gap-2">
-                        <button
-                            className="btn btn-sm btn-dark ml-1"
-                            onClick={flipBoard}
-                        >
-                            <i className="bi bi-arrow-right-circle"></i> Next Puzzle
-                        </button>
-                        <button className="btn btn-sm btn-dark" onClick={flipBoard}>
-                            <i className="bi bi-unlock"></i> Show Solution
-                        </button>
-                    </div>
-                </div>
+        <div className="w-100 d-flex justify-content-between mt-3">
+          <div>
+            <button className="btn btn-sm btn-dark mr-2" onClick={flipBoard}>
+              <i className="bi bi-arrow-repeat"></i> Flip Board
+            </button>
+          </div>
 
-            </div>
+          <div className="d-flex gap-2">
+            <button className="btn btn-sm btn-dark ml-1" onClick={flipBoard}>
+              <i className="bi bi-arrow-right-circle"></i> Next Puzzle
+            </button>
+            <button className="btn btn-sm btn-dark" onClick={flipBoard}>
+              <i className="bi bi-unlock"></i> Show Solution
+            </button>
+          </div>
         </div>
-
-    );
+      </div>
+    </div>
+  );
 }
