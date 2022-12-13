@@ -35,6 +35,7 @@ interface PuzzleData {
   puzzle_state: PUZZLE_STATES;
   puzzle_index: number;
   perspective: string;
+  show_solution: boolean;
 }
 
 // Loading in data of type Puzzle,
@@ -54,6 +55,7 @@ const defaultProps = {
   puzzle_state: PUZZLE_STATES.PUZZLE_INIT,
   puzzle_index: 0,
   perspective: "white",
+  show_solution: false
 };
 
 let isInitialLoad = true;
@@ -124,6 +126,7 @@ const Home: NextPage = () => {
           board: start_board,
           expected_line: expected_line,
           isPlayerWhite: start_board.turn() === "w" ? true : false,
+          show_solution: false
         });
       });
     }
@@ -245,6 +248,13 @@ const Home: NextPage = () => {
     return puzzleFetch;
   }
 
+  const toggleShowSolution = () => {
+    setState({
+      ...state,
+      show_solution: !state.show_solution
+    })
+  }
+
   const handleClose = () => {
     setState({ ...state, puzzle_state: PUZZLE_STATES.PUZZLE_INIT });
   };
@@ -316,15 +326,18 @@ const Home: NextPage = () => {
                   >
                     <i className="bi bi-arrow-right-circle"></i> Next Puzzle
                   </button>
-                  <button className="btn btn-sm btn-dark" onClick={flipBoard}>
+                  <button className="btn btn-sm btn-dark" onClick={toggleShowSolution}>
                     <i className="bi bi-unlock"></i> Show Solution
                   </button>
                 </div>
               </div>
-              <Solution
-                puzzle_index={state.puzzle_index}
-                expected_line={state.expected_line}
-              />
+
+              {state.show_solution && (
+                <Solution
+                  puzzle_index={state.puzzle_index}
+                  expected_line={state.expected_line}
+                />
+              )}
             </div>
           </div>
         </main>

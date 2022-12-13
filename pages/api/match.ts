@@ -5,6 +5,7 @@ import Match, { type IMatch } from "../../models/Match";
 import { Chess } from "chess.js";
 import { ObjectId } from "mongodb";
 import { match } from "assert";
+import { Schema } from "mongoose";
 
 export default async function handler(
   req: NextApiRequest,
@@ -84,13 +85,13 @@ export default async function handler(
           // check if the game has been surrendered
           if (move.includes("resigns")) {
             console.log("PLAYER HAS RESIGNED:", move);
-            let winner = move.split(" ")[0];
+            let loser = move.split(" ")[0]; // the color in the string resigns, so they are the loser!
             // if white, player1 wins
             // if black, player2 wins
-            let winnerId = m.player1id;
-            if (winner === "black") {
-              if (m.player2id) {
-                winnerId = m.player2id;
+            let winnerId = m.player2id;
+            if (loser === "black") {
+              if (m.player1id) {
+                winnerId = m.player1id;
               }
             }
 
@@ -110,19 +111,35 @@ export default async function handler(
           // try to load the game according to pgn in database
           game.loadPgn(m.pgn);
           // try and make the move being posted
+          let playerColor = game.turn();
           let validMove = game.move(move);
 
           if (validMove) {
             console.log("MOVE: ", move);
 
             if (game.isGameOver()) {
-              // update database!
-              await Match.where({ _id: matchId })
-                .update({ pgn: game.pgn(), ongoing: false })
-                .exec()
-                .then(() => {
-                  res.status(200).json({ ...m, pgn: game.pgn() });
-                });
+              if (game.isCheckmate()) {
+                // there is a decisive winner
+                let winner = playerColor === "b" ? m.player2id : m.player1id;
+                // update database!
+                await Match.where({ _id: matchId })
+                  .update({ pgn: game.pgn(), ongoing: false, winner: winner })
+                  .exec()
+                  .then(() => {
+                    res
+                      .status(200)
+                      .json({ ...m, pgn: game.pgn(), winner: winner });
+                  });
+              } else {
+                // match is a draw
+                // update database!
+                await Match.where({ _id: matchId })
+                  .update({ pgn: game.pgn(), ongoing: false })
+                  .exec()
+                  .then(() => {
+                    res.status(200).json({ ...m, pgn: game.pgn() });
+                  });
+              }
             } else {
               // update database!
               await Match.where({ _id: matchId })

@@ -1,13 +1,13 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 
-import { useSession, signIn, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Analysis from "../../components/Analysis/Analysis";
-import { getJSON, postJSON } from "../../utils/networkingutils";
+import { getJSON } from "../../utils/networkingutils";
 import { useRouter } from "next/router";
 import { IMatch } from "../../models/Match";
 import CircularLoader from "../../components/CircularLoader";
+import MatchHistory from "../../components/MatchHistory/MatchHistory";
 
 const enum STATES {
   INIT,
@@ -21,7 +21,6 @@ function fetchPGN() {
 const Home: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
-  const { data: session } = useSession();
 
   const [match, setMatch] = useState<IMatch>();
   const [isLoaded, setLoaded] = useState<boolean>(false);
@@ -36,8 +35,6 @@ const Home: NextPage = () => {
             setMatch(data as IMatch);
 
           });
-        } else {
-          throw new Error();
         }
       });
     } catch (err) {
@@ -46,27 +43,6 @@ const Home: NextPage = () => {
   }
 
   // check if the user is signed in. if they are, show them the matchmaking component
-
-  const signin = session ? (
-    <div>
-      Signed in as {session.user?.email}
-      <br />
-      <button onClick={() => signOut()}>Sign out</button>
-    </div>
-  ) : (
-    <div>
-      Not signed in.
-      <br />
-      <button onClick={() => signIn()}>Sign in</button>
-    </div>
-  );
-
-  // const moves_cmpnt = state.moves?.map((str, i) => <li key={i}>{str}</li>)
-
-  // const handleClose = () => {
-  //     setState({...state, puzzle_state: PUZZLE_STATES.PUZZLE_INIT});
-  // };
-
   return (
     <div className="">
       <div className="">
@@ -76,38 +52,31 @@ const Home: NextPage = () => {
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        {signin}
-
-        {/* <Modal show={state.puzzle_state === PUZZLE_STATES.PUZZLE_END} onHide={handleClose}>
-                <Modal.Header closeButton>
-                <Modal.Title>Puzzle complete!</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>You've solved the puzzle! Dismiss to continue to another.</Modal.Body>
-                <Modal.Footer>
-                <Button variant="primary" onClick={handleClose}>
-                    Close
-                </Button>
-                </Modal.Footer>
-            </Modal> */}
-
         <main className="container d-flex flex-col justify-content-center align-items-center">
-          {/* <div>Match: {state.matchId}</div> */}
-
           <h1 className="display-2">Post Game Analysis</h1>
 
           <div className="text-center">
             <p>
-              Revisit a game you've played and see what Stockfish thinks of your play!
+              Revisit a game you've played and see what Stockfish thinks of your
+              play!
             </p>
           </div>
-          {/* <p>game pgn: {fetchPGN()}</p> */}
 
           <div className="w-100 card my-3">
             <div className="card-body d-flex flex-col justify-content-center align-items-center">
               {match && <Analysis match_pgn={match.pgn} canReset={false} />}
               {!match && <CircularLoader />}
+              {match === undefined && (
+                <div>
+                  An internal server error occured: specific match with ID: {id}{" "}
+                  could not be fetched from server.
+                </div>
+              )}
             </div>
           </div>
+          
+          <MatchHistory/>
+
         </main>
       </div>
     </div>
@@ -126,13 +95,5 @@ export async function getServerSideProps() {
     },
   };
 }
-
-// //not sure if this page is being used .. workaround
-// export async function getStaticPaths() {
-//   return {
-//     paths: [],
-//     fallback: false,
-//   };
-// }
 
 export default Home;

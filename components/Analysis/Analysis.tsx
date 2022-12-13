@@ -1,5 +1,8 @@
+import { css } from "@emotion/react";
 import { Chess, Move } from "chess.js";
 import { useEffect, useState } from "react";
+import { Evaluation } from "../../pages/api/computer";
+import { postJSON } from "../../utils/networkingutils";
 import ChessBoard from "../chessboard/ChessBoard";
 
 enum STATES {
@@ -45,8 +48,6 @@ const defaultState = {
 //      - if back button pressed, undo the move & lower index
 //      - otherwise, we simply make the next move in the history & increment index
 
-
-
 /**
  * Renders an analysis board with the AnalysisData provided to it.
  *
@@ -55,7 +56,7 @@ const defaultState = {
  */
 export default function Analysis(props: AnalysisProps) {
   const [state, setState] = useState<AnalysisState>(defaultState);
-
+  const [evaluation, setEvaluation] = useState<Evaluation>();
   useEffect(() => {
     // load the match id from the database
     if (state.component_state === STATES.INIT) {
@@ -131,6 +132,34 @@ export default function Analysis(props: AnalysisProps) {
     }
   }
 
+
+  function fetchEval(fen: string): Promise<Evaluation> | null {
+    try {
+      let result = postJSON("/api/computer", { fen: fen })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error();
+          }
+        })
+        .then((data) => {
+          // parse the move!!!
+          if (data) {
+            // console.log("Recommended move: ", data.move);
+            return data;
+          }
+        });
+  
+      return result;
+    } catch (err) {
+      console.log(err);
+    }
+  
+    return null;
+  }
+
+  
   /**
    * Select piece
    */
@@ -141,6 +170,18 @@ export default function Analysis(props: AnalysisProps) {
     //     selection: selection,
     //   });
     // }
+  }
+
+  function updateEvaluation(fen: string)
+  {
+    let aiEval = fetchEval(fen);
+    if (aiEval)
+    {
+      aiEval.then((evalData) => {
+        console.log("Evaluation: ", evalData);
+        setEvaluation(evalData);
+      })
+    }
   }
 
   function handleNextClicked() {
@@ -157,6 +198,8 @@ export default function Analysis(props: AnalysisProps) {
         board: new_board,
         move_index: state.move_index + 1,
       });
+
+      updateEvaluation(new_board.fen());
 
     }
 
@@ -177,8 +220,26 @@ export default function Analysis(props: AnalysisProps) {
               board: new_board,
               move_index: state.move_index - 1,
             });
+            updateEvaluation(new_board.fen());
+
           }
     }
+
+  }
+
+  function EvalBar()
+  {
+
+    if (evaluation)
+    {
+
+      // parse the wdl
+
+      return  (<div className="progress">
+      <div className="progress-bar bg-danger" role="progressbar" css={css`width: ${Math.round(parseInt(evaluation.wdl[0]) / 100)}%`} aria-valuenow={Math.round(parseInt(evaluation.wdl[0]) / 100)} aria-valuemin={0} aria-valuemax={100}></div>
+      </div>);
+    }
+
 
   }
 
@@ -218,11 +279,15 @@ export default function Analysis(props: AnalysisProps) {
           </button>
         </div>
       </div>
+      
+      { evaluation && 
+      <div className="my-3">
+        <h1>AI's evaluation</h1>
+        <div>Best move: {evaluation?.move}</div>
+        <div>Best line: {evaluation?.topLines[0].join(" ")}</div>
 
-      <div>
-        <h1>History</h1>
-        <div>{state.history.join(" ")}</div>
       </div>
+}
     </div>
   );
 }

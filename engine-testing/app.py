@@ -7,6 +7,18 @@ import chess                                              # Used to help interfa
 import chess.engine                                       # Used to actually interface with stockfish
 from flask import Flask,Response, request, make_response  # Provides methods for HTTP server implementation
 
+
+def get_line_in_san(board, moves):
+    line_in_san = []
+    # must simulate moves to get correct san ;-;
+    board_copy = chess.Board(board.fen())
+
+    for move in moves:
+        line_in_san.append(board_copy.san(move))
+        board_copy.push(move)
+
+    return line_in_san
+
 # Initialize flask app
 app = Flask(__name__)
 
@@ -79,12 +91,24 @@ async def sendfen() -> Response:
             skill_level = 5
         engine.configure({"Skill Level":skill_level})
         if board.is_valid():
-            analysis = engine.analyse(board, chess.engine.Limit(time=0.1))
-            wdl = analysis["score"].relative.wdl()
-            move = str(analysis["pv"][0])
+            analysis = engine.analyse(board, chess.engine.Limit(time=0.1), multipv=3)
+            print(analysis)
+            best = analysis[0]
+            wdl = best["score"].relative.wdl()
+            best_lines = []
+            for item in analysis:
+                best_lines.append(item["pv"])
+
+
+
+
+            for i in range(len(best_lines)):
+                best_lines[i] = get_line_in_san(board, best_lines[i])
+                # best_lines[i] = list(map(lambda x: str(x), best_lines[i]))
+
             resp = {
-                "move": board.san(analysis["pv"][0]), # convert to SAN
-                "top_3": list(map(lambda x: str(x), analysis["pv"][0:3])),
+                "move": board.san(best["pv"][0]), # convert to SAN
+                "top_3": best_lines,
                 "wdl": [wdl.wins, wdl.draws, wdl.losses]
             }
             return resp
@@ -95,3 +119,6 @@ async def sendfen() -> Response:
 
 if __name__ == '__main__': # if app.py is run directly
     app.run(host="0.0.0.0", port=8228)
+
+
+

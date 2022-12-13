@@ -23,9 +23,10 @@ import Button from "react-bootstrap/Button";
 
 import { postJSON, request } from "../../utils/networkingutils";
 import { UserInfoContext } from "../../context/UserInfo";
-import { UserInfo } from "os";
+import { userInfo, UserInfo } from "os";
 import { css } from "@emotion/react";
 import CircularLoader from "../../components/CircularLoader";
+import MatchHistory from "../../components/MatchHistory/MatchHistory";
 
 const socket = SocketIO();
 
@@ -176,7 +177,7 @@ const Home: NextPage = () => {
       if (state) {
         // check if the game is over
         if (msg.includes("resigns")) {
-          let winner = msg.split(" ")[0] === "white" ? "black" : "white";
+          let winner = msg.split(" ")[0] === "white" ? "Black" : "White";
 
           let matchData = { winner: winner, method: "resignation" };
 
@@ -202,7 +203,7 @@ const Home: NextPage = () => {
             // determine if draw or win & how
             if (s.isCheckmate()) {
               matchData.method = "checkmate";
-              matchData.winner = s.turn() === "w" ? "black" : "white";
+              matchData.winner = s.turn() === "w" ? "Black" : "White";
             } else {
               matchData.winner = "nobody";
               matchData.method = " by ";
@@ -341,6 +342,16 @@ const Home: NextPage = () => {
       <button onClick={() => signIn()}>Sign in</button>
     </div>
   );
+    
+  function shortPerspective(perspective: string)
+  {
+    return perspective.slice(0,1);
+  }
+
+  function playerColor(isPlayerWhite: boolean)
+  {
+    return (isPlayerWhite) ? 'w' : 'b';
+  }
 
   const moves_cmpnt = state.moves?.map((str, i) => <li key={i}>{str}</li>);
 
@@ -366,14 +377,11 @@ const Home: NextPage = () => {
           <Modal.Title>Match ended</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {state.matchData.winner} wins by {state.matchData.method}
+          {state.matchData.winner} wins by {state.matchData.method}.
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
           <Button variant="primary" onClick={handleClose}>
-            Save Changes
+          Close
           </Button>
         </Modal.Footer>
       </Modal>
@@ -389,18 +397,16 @@ const Home: NextPage = () => {
 
         <div className="w-100 card my-3">
           <div className="card-body d-flex flex-col justify-content-center align-items-center">
-            <div>Match: {state.matchId}</div>
-
-            <div>Player color: {state.isPlayerWhite ? "white" : "black"}</div>
             {state.matchId === "" && (
             <MatchFinder
               onFindMatch={onMatchRequest}
               match_state={state.match_state}
             />
             )}
+            { (state.match_state === MATCH_STATES.MATCH_PLAYING || state.match_state === MATCH_STATES.MATCH_END) && 
             <PlayerProfile
-              user={state.user}
-            />
+              user={(shortPerspective(state.perspective) !== playerColor(state.isPlayerWhite)) ? state.user : state.opponent}
+            /> }
             {state && (
               <ChessBoard
                 board={state.board}
@@ -411,7 +417,11 @@ const Home: NextPage = () => {
                 setSelection={selectPiece}
               />
             )}
-            <PlayerProfile user={state.opponent} />
+            
+            { (state.match_state === MATCH_STATES.MATCH_PLAYING || state.match_state === MATCH_STATES.MATCH_END) && 
+            <PlayerProfile
+              user={(shortPerspective(state.perspective) === playerColor(state.isPlayerWhite)) ? state.user : state.opponent}
+            /> }
             <div className="w-100 d-flex justify-content-between mt-3">
               <div>
                 <button
@@ -427,12 +437,15 @@ const Home: NextPage = () => {
                   onClick={surrender}
                   className="btn btn-sm btn-dark ml-1"
                 >
-                  <i className="bi bi-arrow-right-circle"></i>Surrender
+                  <i className="bi bi-flag"></i>Resign
                 </button>
               </div>
             </div>
           </div>
         </div>
+
+              <MatchHistory/>
+
       </main>
     </div>
   );
@@ -449,9 +462,9 @@ function PlayerProfile(props: {user: IUser | null})
         <div className="col-2 p-0">
           <img src={props.user.image} className="img-fluid" />
         </div>
-        <div className="col-10">
+        <div className="col-10 d-flex align-items-center">
           <h1 className="display-6">{props.user.name} <span css={css`font-size : .7em;`}>{` (${elo})`}</span>
-          <img src="diamond.png" css={css`width: 1em; height: 1em;`} className="diamond-icon"/></h1>
+          { props.user.premiumMember && <img src="diamond.png" css={css`width: 1em; height: 1em;`} className="mx-2 diamond-icon"/>}</h1>
 
         </div>
       </div>
