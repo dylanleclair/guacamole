@@ -50,11 +50,10 @@ function checkGameOver(board: Chess): MatchMetadata {
   let matchData = { winner: "", method: "" };
 
   if (board.isGameOver()) {
-    let matchData = { winner: "", method: "" };
     // determine if draw or win & how
     if (board.isCheckmate()) {
       matchData.method = "checkmate";
-      matchData.winner = board.turn() === "w" ? "black" : "white";
+      matchData.winner = board.turn() === "w" ? "Black" : "White";
     } else {
       matchData.winner = "nobody";
       matchData.method = " by ";
@@ -69,6 +68,8 @@ function checkGameOver(board: Chess): MatchMetadata {
   }
   return matchData;
 }
+
+
 
 function fetchBestMove(fen: string): Promise<string> | null {
   try {
@@ -106,6 +107,24 @@ export default function ComputerBoard(props: ComputerProps) {
   const [state, setState] = useState<ComputerState>(defaultState);
 
   // basically all we need to do is fetch an endpoint. as long as we have ELO & other settings, we don't need anything else.
+
+  function resign() {
+
+    let color = state.isPlayerWhite ? "white" : "black";
+    
+    let matchData = { winner: "", method: "" };
+
+    matchData.method = "resignation";
+    matchData.winner = "Computer"
+
+    setState({
+      ...state,
+      component_state: STATES.END,
+      matchData: matchData
+    });
+
+    return matchData;
+  }
 
   useEffect(() => {
     // load the match id from the database
@@ -249,7 +268,7 @@ export default function ComputerBoard(props: ComputerProps) {
             <Modal.Title>Match ended</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {state.matchData.winner} wins by {state.matchData.method}
+            {state.matchData.winner} wins by {state.matchData.method}.
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleClose}>
@@ -269,11 +288,9 @@ export default function ComputerBoard(props: ComputerProps) {
           </div>
 
           <div className="d-flex gap-2">
-            <button className="btn btn-sm btn-dark ml-1" onClick={flipBoard}>
-              <i className="bi bi-arrow-right-circle"></i> Next Puzzle
-            </button>
-            <button className="btn btn-sm btn-dark" onClick={flipBoard}>
-              <i className="bi bi-unlock"></i> Show Solution
+
+            <button className="btn btn-sm btn-dark" onClick={resign}>
+              <i className="bi bi-flag"></i> Resign
             </button>
           </div>
         </div>

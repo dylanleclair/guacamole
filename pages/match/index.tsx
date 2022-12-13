@@ -177,7 +177,7 @@ const Home: NextPage = () => {
       if (state) {
         // check if the game is over
         if (msg.includes("resigns")) {
-          let winner = msg.split(" ")[0] === "white" ? "black" : "white";
+          let winner = msg.split(" ")[0] === "white" ? "Black" : "White";
 
           let matchData = { winner: winner, method: "resignation" };
 
@@ -203,7 +203,7 @@ const Home: NextPage = () => {
             // determine if draw or win & how
             if (s.isCheckmate()) {
               matchData.method = "checkmate";
-              matchData.winner = s.turn() === "w" ? "black" : "white";
+              matchData.winner = s.turn() === "w" ? "Black" : "White";
             } else {
               matchData.winner = "nobody";
               matchData.method = " by ";
@@ -377,7 +377,7 @@ const Home: NextPage = () => {
           <Modal.Title>Match ended</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {state.matchData.winner} wins by {state.matchData.method}
+          {state.matchData.winner} wins by {state.matchData.method}.
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
@@ -440,7 +440,7 @@ const Home: NextPage = () => {
                   onClick={surrender}
                   className="btn btn-sm btn-dark ml-1"
                 >
-                  <i className="bi bi-arrow-right-circle"></i>Surrender
+                  <i className="bi bi-flag"></i>Resign
                 </button>
               </div>
             </div>

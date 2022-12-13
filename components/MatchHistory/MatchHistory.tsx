@@ -130,6 +130,7 @@ export default function MatchHistory(props: {}) {
         getJSON("/api/match/history").then((response) => {
                 if (response.ok){
                     response.json().then((data) => {
+                        data.reverse();
                         setMatches(data as IMatch[]);
                     })
                 }
@@ -149,7 +150,7 @@ export default function MatchHistory(props: {}) {
 
     // find the user's last 5 matches, and then render a preview of them in a list.
 
-  return (matchCards) ?
+  return (matchCards.length > 0) ?
     (<div className="my-5 d-flex flex-column justify-content-center align-items-center gap-3">
         <h1>Your Match History</h1>
         {matchCards && matchCards}

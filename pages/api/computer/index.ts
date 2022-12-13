@@ -9,6 +9,12 @@ import { postJSON } from "../../../utils/networkingutils";
 
 var PROXY = "http://sf-engine:8228/";
 
+export interface Evaluation {
+  move: string;
+  wdl: string[];
+  topLines: string[][];
+}
+
 interface MoveReply {
   move: String;
 }
@@ -31,7 +37,7 @@ async function fetchBestMove(fen: string): Promise<any> {
       .then((data) => {
         // parse the move!!!
         if (data) {
-          // console.log("AI replied: ", data);
+          console.log("AI replied: ", data);
           return data;
         }
       });
@@ -46,7 +52,7 @@ async function fetchBestMove(fen: string): Promise<any> {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<MoveReply>
+  res: NextApiResponse<Evaluation>
 ) {
   // then do handling of request
   const { method } = req;
@@ -57,10 +63,10 @@ export default async function handler(
         const analysis = await fetchBestMove(req.body.fen);
 
         const bestMove = analysis.move;
-        res.status(200).json({ move: bestMove });
+        res.status(200).json({ move: analysis.move, wdl: analysis.wdl, topLines: analysis.top_3 });
       } catch (err) {
         console.log(err);
-        res.status(400).json({ move: "" });
+        res.status(400).json({ move: "", wdl: [], topLines: []});
       }
 
       break;
