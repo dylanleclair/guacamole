@@ -26,6 +26,7 @@ import { UserInfoContext } from "../../context/UserInfo";
 import { UserInfo } from "os";
 import { css } from "@emotion/react";
 import CircularLoader from "../../components/CircularLoader";
+import MatchHistory from "../../components/MatchHistory/MatchHistory";
 
 const socket = SocketIO();
 
@@ -433,6 +434,9 @@ const Home: NextPage = () => {
             </div>
           </div>
         </div>
+
+              <MatchHistory/>
+
       </main>
     </div>
   );

@@ -34,8 +34,6 @@ const Home: NextPage = () => {
             setMatch(data as IMatch);
 
           });
-        } else {
-          throw new Error();
         }
       });
     } catch (err) {
@@ -64,14 +62,13 @@ const Home: NextPage = () => {
                 </Button>
                 </Modal.Footer>
             </Modal> */}
-
         <main className="container d-flex flex-col justify-content-center align-items-center">
-
           <h1 className="display-2">Post Game Analysis</h1>
 
           <div className="text-center">
             <p>
-              Revisit a game you've played and see what Stockfish thinks of your play!
+              Revisit a game you've played and see what Stockfish thinks of your
+              play!
             </p>
           </div>
 
@@ -79,6 +76,12 @@ const Home: NextPage = () => {
             <div className="card-body d-flex flex-col justify-content-center align-items-center">
               {match && <Analysis match_pgn={match.pgn} canReset={false} />}
               {!match && <CircularLoader />}
+              {match === undefined && (
+                <div>
+                  An internal server error occured: specific match with ID: {id}{" "}
+                  could not be fetched from server.
+                </div>
+              )}
             </div>
           </div>
         </main>
