@@ -37,18 +37,20 @@ export default async function handler(
 
           if (user)
           {
-            let matches = await Match.find<IMatch>({$or:[{player1id: new ObjectId(user._id),
+                Match.find<IMatch>({$or:[{player1id: new ObjectId(user._id),
               ongoing: false,}, {player2id: new ObjectId(user._id),
-              ongoing: false,}]});
-            res.status(200).json(matches);
-            return;
+              ongoing: false,}]}).sort('-date').populate('player2id').exec((err,docs) => {
+                console.log(docs);
+                if (err) res.status(400).end();
+                res.status(200).json(docs);
+              });
+            
+            // res.status(200).json(matches);
           } 
-          throw new Error();
         } catch {
           throw new Error();
         }
 
-        break;
     }
   } catch (err) {
     res.status(400).end();

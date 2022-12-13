@@ -7,6 +7,7 @@ import { getJSON } from "../../utils/networkingutils";
 import { useRouter } from "next/router";
 import { IMatch } from "../../models/Match";
 import CircularLoader from "../../components/CircularLoader";
+import MatchHistory from "../../components/MatchHistory/MatchHistory";
 
 const enum STATES {
   INIT,
@@ -84,6 +85,9 @@ const Home: NextPage = () => {
               )}
             </div>
           </div>
+          
+          <MatchHistory/>
+
         </main>
       </div>
     </div>

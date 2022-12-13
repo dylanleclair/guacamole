@@ -6,6 +6,7 @@ import { useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Analysis from "../../components/Analysis/Analysis";
+import MatchHistory from "../../components/MatchHistory/MatchHistory";
 
 /**
  * States of play. Used to decide what to render.
@@ -81,6 +82,8 @@ const Home: NextPage = () => {
               <Analysis match_pgn={pgn} canReset={true} />
             </div>
           </div>
+
+          <MatchHistory />
         </main>
 
       </div>
