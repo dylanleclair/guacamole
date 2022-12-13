@@ -39,6 +39,22 @@ export function postJSON(url: string, payload: any) {
   });
 }
 
+
+/**
+ * Use when GETing JSON with fetch
+ * @param url - the api endpoint to POST to
+ * @returns a promise, with the response of fetch(url) with JSON set as expected content type.
+ */
+export function getJSON(url: string) {
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+}
+
+
 export function putJSON(url: string, payload: any) {
   return fetch(url, {
     method: "PUT",

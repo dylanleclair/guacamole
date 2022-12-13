@@ -159,7 +159,6 @@ function LastMoveHints(board: Chess, perspective: string) {
   let hints: EmotionJSX.Element[] = [];
   // calculate the most recent move and render hints accordingly
   let history = board.history({ verbose: true }) as Move[];
-  console.log("HISTORY: ", history);
   let lastMove = history.pop();
   if (lastMove) {
     let indices = boardNotationToIndices(lastMove.from, perspective);

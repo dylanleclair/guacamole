@@ -1,4 +1,4 @@
-# Cascadia
+# Caskaydia Chess: a live service chess game
 
 ![Cascadia logo](public/logo.svg)
 
@@ -80,3 +80,52 @@ You need to register a github OAuth application in order to setup a user. To do 
 5. Click *Generate a new client secret* then copy it and add it to your environment file `GITHUB_SECRET=Client_Secret`
 
 [Video Walkthrough for Github](https://youtu.be/e2EKSJkXkqQ?t=372) (6 mins 12 seconds in)
+
+
+### Example PGN for testing analysis
+
+```text
+[Event "Live Chess"]
+[Site "Chess.com"]
+[Date "2022.12.01"]
+[Round "?"]
+[White "Jimenez506"]
+[Black "oolongmafia"]
+[Result "0-1"]
+[ECO "B10"]
+[WhiteElo "886"]
+[BlackElo "1021"]
+[TimeControl "600"]
+[EndTime "20:41:23 PST"]
+[Termination "oolongmafia won by checkmate"]
+
+1. e4 c6 2. Be2 d5 3. Bh5 g6 4. Bg4 dxe4 5. h3 Nf6 6. Nc3 Bxg4 7. hxg4 Bh6 8. d4
+c5 9. Rxh6 cxd4 10. Nb5 O-O 11. Nxd4 Nc6 12. Nxc6 bxc6 13. Qxd8 Rfxd8 14. Be3
+Nxg4 15. Rh4 Nxe3 16. fxe3 Rab8 17. Rxe4 Rxb2 18. Rxe7 Rxc2 19. Rxa7 Rxg2 20.
+Rc1 Rxg1+ 21. Kf2 Rxc1 22. a4 Rc2+ 23. Kf3 c5 24. a5 Ra2 25. a6 c4 26. Rc7 Rxa6
+27. Rxc4 Rf6+ 28. Ke2 g5 29. e4 Re8 30. Kd3 g4 31. e5 Rd8+ 32. Ke4 Rf1 33. Ke3
+g3 34. Rg4+ Kf8 35. Rxg3 Re1+ 36. Kf4 Re8 37. Rh3 R8xe5 38. Rxh7 R5e4+ 39. Kf5
+Re6 40. Kf4 Rf1+ 41. Kg5 Rg6+ 42. Kh5 Rh1# 0-1
+```
+
+### Working around stripe (manually make a user premium)
+
+To make a member premium, you can directly access the database and modify your user.
+
+Navigate to http://localhost:8081/db/test/users and select the document for the user you wish to promote to a premium membership.
+
+Then, at the bottom of the document, add `premiumMember: true`. It should look like: 
+
+```
+{
+    _id: ObjectId('63915c312383ef195637c898'),
+    name: 'dylanleclair',
+    email: 'dylan.leclair@icloud.com',
+    image: 'https://avatars.githubusercontent.com/u/45674837?v=4',
+    emailVerified: null,
+    premiumMember: true
+}
+```
+
+Now, any premium pages should be accessible *without having to install the Stripe CLI*. 
+

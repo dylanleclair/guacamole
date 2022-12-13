@@ -9,6 +9,7 @@ enum STATES {
 
 interface AnalysisProps {
   match_pgn: string;
+  canReset: boolean
 }
 
 interface AnalysisState {
@@ -84,6 +85,21 @@ export default function Analysis(props: AnalysisProps) {
     return () => { };
   }, [state]);
 
+
+  function forceUpdate() {
+    setState({
+      ...state,
+      board: new Chess(),
+      history: [],
+      match_pgn: "",
+      move_index: 0,
+      selection: "",
+      isPlayerWhite: true,
+      perspective: "white",
+      component_state: STATES.INIT,
+    });
+  }
+
   /**
    * Flips the board perspective.
    */
@@ -128,35 +144,51 @@ export default function Analysis(props: AnalysisProps) {
   }
 
   function handleNextClicked() {
-    let new_board = new Chess();
-    let isPGNValid = new_board.loadPgn(state.board.pgn());
-    new_board.move(state.history[state.move_index]);
-    // make the move & increment move index
-    setState({
-      ...state,
-      board: new_board,
-      move_index: state.move_index + 1
-    })
-  }
 
-  function handleBackClicked() {
-    let new_board = new Chess();
-    let isPGNValid = new_board.loadPgn(state.board.pgn());
+    if (state.move_index < state.history.length)
+    {
 
-    if (isPGNValid) {
-      new_board.undo();
+      let new_board = new Chess();
+      let isPGNValid = new_board.loadPgn(state.board.pgn());
+      new_board.move(state.history[state.move_index]);
       // make the move & increment move index
       setState({
         ...state,
         board: new_board,
-        move_index: state.move_index - 1,
+        move_index: state.move_index + 1,
       });
+
+    }
+
+
+  }
+
+  function handleBackClicked() {
+    if (state.move_index != 0)
+    {
+          let new_board = new Chess();
+          let isPGNValid = new_board.loadPgn(state.board.pgn());
+
+          if (isPGNValid) {
+            new_board.undo();
+            // make the move & increment move index
+            setState({
+              ...state,
+              board: new_board,
+              move_index: state.move_index - 1,
+            });
+          }
     }
 
   }
 
   return (
     <div className="w-100">
+      {props.canReset && (
+        <div className="btn btn-primary w-100 my-3" onClick={forceUpdate}>
+          Load PGN
+        </div>
+      )}
 
       <ChessBoard
         board={state.board}
@@ -169,10 +201,7 @@ export default function Analysis(props: AnalysisProps) {
 
       <div className="w-100 d-flex justify-content-between mt-3">
         <div>
-          <button
-            className="btn btn-sm btn-dark mr-2"
-            onClick={flipBoard}
-          >
+          <button className="btn btn-sm btn-dark mr-2" onClick={flipBoard}>
             <i className="bi bi-arrow-repeat"></i> Flip Board
           </button>
         </div>
@@ -182,10 +211,10 @@ export default function Analysis(props: AnalysisProps) {
             className="btn btn-sm btn-dark ml-1"
             onClick={handleBackClicked}
           >
-            <i className="bi bi-arrow-right-circle"></i> Previous
+            <i className="bi bi-arrow-left-circle"></i> Previous
           </button>
           <button className="btn btn-sm btn-dark" onClick={handleNextClicked}>
-            <i className="bi bi-unlock"></i> Next
+            Next <i className="bi bi-arrow-right-circle"></i>
           </button>
         </div>
       </div>
@@ -194,8 +223,6 @@ export default function Analysis(props: AnalysisProps) {
         <h1>History</h1>
         <div>{state.history.join(" ")}</div>
       </div>
-
-
-    </div >
+    </div>
   );
 }

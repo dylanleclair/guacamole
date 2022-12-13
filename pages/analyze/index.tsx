@@ -1,15 +1,8 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 
-import { useSession, signIn, signOut } from "next-auth/react";
-import { IMatch } from "../../models/Match";
-import { useEffect, useState } from "react";
-import { Chess, Move } from "chess.js";
-
-import ChessBoard from "../../components/chessboard/ChessBoard";
-
-import ChessUser, { IUser } from "../../models/User";
+import { useSession, } from "next-auth/react";
+import { useState } from "react";
 
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
@@ -89,9 +82,6 @@ const Home: NextPage = () => {
             <p>
               Paste in the PGN from one of your games and go over the moves you
               played!
-              <br />
-              <br />
-              Premium members get AI assisted analysis!
             </p>
           </div>
           {/* <p>game pgn: {fetchPGN()}</p> */}
@@ -111,14 +101,12 @@ const Home: NextPage = () => {
                   onChange={handlePGNChange}
                 ></textarea>
               </div>
-              <div className="btn btn-primary w-100 my-3">Load PGN</div>
 
-              <Analysis match_pgn={pgn} />
+              <Analysis match_pgn={pgn} canReset={true} />
             </div>
           </div>
         </main>
 
-        <main>{/* <div>Match: {state.matchId}</div> */}</main>
       </div>
     </div>
   );
