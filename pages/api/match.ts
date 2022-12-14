@@ -4,8 +4,6 @@ import "../../lib/databaseConnection";
 import Match, { type IMatch } from "../../models/Match";
 import { Chess } from "chess.js";
 import { ObjectId } from "mongodb";
-import { match } from "assert";
-import { Schema } from "mongoose";
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,59 +12,10 @@ export default async function handler(
   const { method } = req;
 
   switch (method) {
-    case "GET":
-      try {
-        const chess: Chess = new Chess();
-        let moveCount = 0;
-        console.log(chess.moves({ verbose: true })[0]);
-        while (moveCount < 30) {
-          const moves = chess.moves();
-          const move = moves[Math.floor(Math.random() * moves.length)];
-          chess.move(move);
-          moveCount += 1;
-        }
-
-        res.status(200).json({ player1id: null, pgn: chess.pgn() });
-      } catch (error) {
-        console.log(error);
-        res.status(400).json({});
-      }
-      break;
-    // DEPRECATED
-    // case "POST":
-
-    //   try {
-    //     let chess = new Chess();
-    //     for (let i = 0; i < 20; i++) {
-    //       let index = randomInt(chess.moves().length);
-    //       chess.move(chess.moves()[index]);
-    //     }
-    //     console.log(chess.pgn());
-
-    //     console.log("PLAYERID: ", req.body);
-
-    //     console.log("MAKING A NEW MATCH!");
-
-    //     // random chess game
-    //     let m = await Match.create<IMatch>({
-    //       player1id: new ObjectId(req.body),
-    //       pgn: chess.pgn(),
-    //       ongoing: false,
-    //     });
-
-    //     if (m) {
-    //       res.status(200).json(m);
-    //     }
-
-    //   } catch (error) {
-    //     console.log(error);
-    //     res.status(400).json({ success: false });
-    //   }
-    //   break;
     case "PATCH":
       try {
-        console.log("MESSAGE BODY:");
-        console.log(JSON.parse(req.body));
+        // console.log("MESSAGE BODY:");
+        // console.log(JSON.parse(req.body));
 
         let data = JSON.parse(req.body);
 
@@ -80,11 +29,11 @@ export default async function handler(
         if (m) {
           // if player resigned, update winner & exit.
 
-          console.log("found the match!");
+          // console.log("found the match!");
 
           // check if the game has been surrendered
           if (move.includes("resigns")) {
-            console.log("PLAYER HAS RESIGNED:", move);
+            // console.log("PLAYER HAS RESIGNED:", move);
             let loser = move.split(" ")[0]; // the color in the string resigns, so they are the loser!
             // if white, player1 wins
             // if black, player2 wins

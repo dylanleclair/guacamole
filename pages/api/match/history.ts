@@ -12,6 +12,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IMatch[]>
 ) {
+   /**
+   * Fetch the user session (this is an authenticated endpoint)
+   */
   const session = await unstable_getServerSession(req, res, authOptions);
 
   try {
@@ -37,10 +40,10 @@ export default async function handler(
 
           if (user)
           {
+            // fetch matches where the player played as WHITE or played as BLACK
                 Match.find<IMatch>({$or:[{player1id: new ObjectId(user._id),
               ongoing: false,}, {player2id: new ObjectId(user._id),
               ongoing: false,}]}).sort('-date').populate('player2id').exec((err,docs) => {
-                console.log(docs);
                 if (err) res.status(400).end();
                 res.status(200).json(docs);
               });

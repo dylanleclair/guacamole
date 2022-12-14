@@ -112,24 +112,12 @@ export default function Analysis(props: AnalysisProps) {
   }
 
   /**
-   * Sends the move the player wants to make to the server for processing.
+   * Updates the board.
    * @param moveToMake the Move (from chess.js) that the player wants to make
    */
   function makeMove(moveToMake: Move) {
     let s = new Chess(state.board.fen());
     let result = s.move(moveToMake);
-
-    // this makes sure that the move being sent to server is legal.
-    // this is not really necessary, since the server will also validate before updating the match.
-    if (result) {
-      // check if move is in the expected line
-      // console.log(state.expected_line)
-      // setState({
-      //     ...state,
-      //     board: s,
-      //     puzzle_index: state.puzzle_index + 1
-      // });
-    }
   }
 
 
@@ -161,15 +149,9 @@ export default function Analysis(props: AnalysisProps) {
 
   
   /**
-   * Select piece
+   * Select piece - do nothing on purpose, since this board is not interactive.
    */
   function selectPiece(selection: string) {
-    // if (state.component_state === STATES.ANALYZE) {
-    //   setState({
-    //     ...state,
-    //     selection: selection,
-    //   });
-    // }
   }
 
   function updateEvaluation(fen: string)

@@ -28,10 +28,14 @@ interface ChessBoardProps {
   colorScheme?: ColorScheme;
 }
 
-// they use special presets to determine positiions on board. transform is hardcoded
-
 const FILES = "abcdefgh";
 
+/**
+ * Convert indexes on the board to chess notation
+ * @param pos the i,j position (like indexing into a matrix)
+ * @param perspective the perspective to transform into (labels are different from black/white perspective)
+ * @returns the label of the square
+ */
 function convertIndicesToBoardNotation(
   pos: { i: number; j: number },
   perspective: string
@@ -284,6 +288,12 @@ function Labels(perspective: string, light: string, dark: string) {
   );
 }
 
+/**
+ * Converts window coordinates to coordinates local to the board component.
+ * @param canvas the div the chessboard is being rendered in
+ * @param windowCoords the position in the browser the mouse is in
+ * @returns coordinates local to the board component (0,0 is top left).
+ */
 function windowToBoardCoords(
   canvas: HTMLDivElement,
   windowCoords: Position
@@ -296,25 +306,9 @@ function windowToBoardCoords(
   };
 }
 
-function getMousePos(
-  boardRef: React.MutableRefObject<HTMLDivElement>,
-  event: MouseEvent
-) {
-  const r = windowToBoardCoords(boardRef.current!, {
-    x: event.clientX,
-    y: event.clientY,
-  });
-}
-
-function mouseDown(event: MouseEvent) {
-  // we want to move the piece with the cursor
-  // console.log("pos: " + event.clientX + " " + event.clientY);
-}
-
-function mouseMove(event: MouseEvent) {}
-
-function mouseUp(event: MouseEvent) {}
-
+/**
+ * Information needed when a player promotes a piece.
+ */
 interface PromotionParams {
   board: Chess;
   selection: string;
@@ -350,6 +344,7 @@ export default function NewBoard(props: ChessBoardProps) {
     gameBoard.reverse();
   }
 
+  /** Read board, render each piece */
   let pieces = [];
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
@@ -375,10 +370,6 @@ export default function NewBoard(props: ChessBoardProps) {
       })
       .map((x, i) => PromotionPiece(i, x, makeMove));
 
-    // let pieces = PROMOTION_OPTIONS.map((x, i) => {
-    //   return PromotionPiece(i, x, props.color === "w" ? "w" : "b");
-    // });
-
     return (
       <div className={styles.promotionModalContainer}>
         <div
@@ -391,6 +382,10 @@ export default function NewBoard(props: ChessBoardProps) {
     );
   }
 
+  /**
+   * Handles click event. Need to update selection / make a move depending on whether a current selection exists and where the user has selected on the board.
+   * @param e the mouse event (with mouse position embedded in it)
+   */
   const handleClick = (e: React.MouseEvent) => {
     // this should be refactored /combined with other methods to support dragging a piece to the target location
     // setSelection / makeMove will be passed in as props
@@ -450,14 +445,10 @@ export default function NewBoard(props: ChessBoardProps) {
       board[indices.j][indices.i] === null ||
       board[indices.j][indices.i]?.color !== color
     ) {
-      // set selection
-      // console.log("no selection");
-      // console.log(board[indices.j][indices.i] === null);
-      // console.log(convertIndicesToBoardNotation(indices, props.perspective));
+      // clear selection
       props.setSelection("");
     } else {
       // set selection
-      // console.log("new selection!");
       props.setSelection(
         convertIndicesToBoardNotation(indices, props.perspective)
       );

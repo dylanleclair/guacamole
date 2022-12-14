@@ -27,7 +27,6 @@ function PlayerColor(props: {color: string})
 
 function MatchHistoryCard(match: IMatch, player: IUser, key: number)
 {
-    console.log(match);
 
     let board = new Chess();
     board.loadPgn(match.pgn);
@@ -49,21 +48,6 @@ function MatchHistoryCard(match: IMatch, player: IUser, key: number)
     
 
     let isWinner = (match.winner === player._id) ? WIN : LOSS ;
-    
-    let opponentID = (player._id === match.player1id) ? match.player2id : match.player1id;
-    
-    let opponentUserName: string = "";
-
-    postJSON("/api/user/info", { id: opponentID }).then((response) => {
-        if (response.ok)
-        {
-            response.json().then((data) => {
-                console.log(data)
-                opponentUserName = data.name;
-            })
-        }
-    }
-    );
 
     return (
       <div
@@ -113,10 +97,9 @@ function MatchHistoryCard(match: IMatch, player: IUser, key: number)
 }
 
 /**
- * Renders an analysis board with the AnalysisData provided to it.
+ * Renders a user's match history.
  *
- * Will be provided the pgn of the game to analyze.
- * @returns
+ * @returns JSX elements rendering the games a user has played.
  */
 export default function MatchHistory(props: {}) {
     const userInfo = useContext(UserInfoContext);

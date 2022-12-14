@@ -12,6 +12,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IMatch | string>
 ) {
+  /**
+   * Fetch the user session (this is an authenticated endpoint)
+   */
   const session = await unstable_getServerSession(req, res, authOptions);
 
   try {
@@ -20,7 +23,7 @@ export default async function handler(
       let e = session.user?.email;
 
       if (e) {
-        email = e;
+        email = e;  // update email if the user & their email exists.
       } else throw Error("Session invalid.");
     } else throw Error("Session invalid.");
 
@@ -28,6 +31,10 @@ export default async function handler(
     const { method } = req;
 
     switch (method) {
+      /**
+       * Fetches the match that the authenticated user is playing in currently, returning a 400 error code when one is not found.
+       * An active match is indicated by the value { ..., ongoing: true } in the Match document.
+       */
       case "GET":
         try {
           const user = await ChessUser.findOne<IUser>({
