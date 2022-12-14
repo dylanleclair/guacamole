@@ -18,16 +18,18 @@ A live service chess app with additional analysis and ai gameplay provided by st
       - `cd` into the repository folder. now proceed with the instructions listed below
 2. Install node
    - in the project/repo's root folder, run "npm install"
-3. Setup your `.env` file
+3. Setup your `.env.local` file
+   - If you are the TA grading this project, we have submitted an example `.env.local` file with our source code (and you should be able to skip the environment configuration listed below.)
    - See [environment configuration](#setting-up-an-environment-file) for details
 4. Run the project `docker-compose up -d`
    - this will start the Docker multi-container
    - open up Docker Desktop.
    - once the guacamole container pops up in "Containers", the app is all ready to go!
+      - all of the containers should show up as green, indicating that they are running smoothly.
    - you can go to http://localhost:3000 to see the homepage!
 4. Setup puzzles (see: [setting up puzzles](#setting-up-puzzles))
 
-The first call to any endpoint/page is usually processed really slowly. You just need to be patient and wait until the server responds. Refresh the page if an error occurs. 
+For some reason on Windows, the first call to any endpoint/page is usually processed really slowly. You just need to be patient and wait until the server responds. Refresh the page if an error occurs (usually a timeout). 
 
 ## Project Stack
 
