@@ -118,6 +118,8 @@ You need to register a github OAuth application in order to setup a user. To do 
 
 ### Setting up Puzzles (required for /puzzles to work)
 
+The project container needs to be running (ie: http://localhost:3000 should load something) when you run these commands.
+
 The easy way: 
 * Run `./post_puzzles.sh` from the project's root directory. (if on Windows, just run the commands listed in the file)
    * `cd engine-testing`
