@@ -1,16 +1,5 @@
 import { MATCH_STATES } from "../../pages/match";
 
-/*
-
-Matchmaking algorithm brief:
-
-- when a user requests a game:
-    - we check if a suitable game already exists
-    - if not, then create a new Match entry in the database, with the player1id or player2id left null (at random)
-
-this is all done by messaging over websocket!
-
-*/
 interface MatchFinderProps {
     onFindMatch(): void,
     match_state: MATCH_STATES;

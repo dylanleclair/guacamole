@@ -58,15 +58,6 @@ const defaultProps = {
   show_solution: false
 };
 
-let isInitialLoad = true;
-
-function fetchPuzzle(): PuzzleInfo {
-  return {
-    start_position: "8/8/8/8/8/2k5/3r4/2K5 w - - 26 127",
-    expected_line: ["Kb1", "Rh2", "Ka1", "Kb3", "Kb1", "Rh1#"],
-  };
-}
-
 /** Used to hide / reveal the state of the puzzle. */
 function Solution(props: { expected_line: string[]; puzzle_index: number }) {
   return (
@@ -110,9 +101,8 @@ const Home: NextPage = () => {
     // load the match id from the database
     if (state.puzzle_state === PUZZLE_STATES.PUZZLE_INIT) {
       getPuzzle().then((puzzle) => {
-        console.log(puzzle);
-
-        console.log("parsing puzzle");
+        // console.log(puzzle);
+        // console.log("parsing puzzle");
         let start_board = new Chess(puzzle.start_position);
         let expected_line = puzzle.expected_line;
 
@@ -136,12 +126,12 @@ const Home: NextPage = () => {
       state.puzzle_index % 2 === 0
     ) {
       // if solving and the move is wrong, undo the move.
-      console.log("HISTORY: ", state.board.history());
+      // console.log("HISTORY: ", state.board.history());
       if (
         state.board.history()[state.board.history().length - 1] !==
         state.expected_line[state.puzzle_index - 1]
       ) {
-        console.log("wrong move!!!");
+        // console.log("wrong move!!!");
         let s = new Chess();
         if (s.loadPgn(state.board.pgn())) {
           if (s.undo()) {
@@ -228,14 +218,9 @@ const Home: NextPage = () => {
     }
   }
 
-  // const moves_cmpnt = state.moves?.map((str, i) => <li key={i}>{str}</li>)
-
-  // Write a function that will post a get request to the puzzles end point.
-  // Return the puzzle
-
   async function getPuzzle() {
     // Send http get request to localhost:3000/puzzles
-    // Parse as JSOn into a JS object
+    // Parse as JSOM into a JS object
     // Return the object I get
 
     // Fetch from the page
@@ -248,6 +233,9 @@ const Home: NextPage = () => {
     return puzzleFetch;
   }
 
+  /**
+   * Toggles the show_solution variable in state
+   */
   const toggleShowSolution = () => {
     setState({
       ...state,
@@ -255,6 +243,9 @@ const Home: NextPage = () => {
     })
   }
 
+  /**
+   * Resets the statemachine for this component
+   */
   const handleClose = () => {
     setState({ ...state, puzzle_state: PUZZLE_STATES.PUZZLE_INIT });
   };
@@ -284,7 +275,6 @@ const Home: NextPage = () => {
         </Modal>
 
         <main className="container d-flex flex-col justify-content-center align-items-center">
-          {/* <div>Match: {state.matchId}</div> */}
 
           <h1 className="display-2">Puzzles</h1>
 

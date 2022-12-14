@@ -27,6 +27,8 @@ A live service chess app with additional analysis and ai gameplay provided by st
    - you can go to http://localhost:3000 to see the homepage!
 4. Setup puzzles (see: [setting up puzzles](#setting-up-puzzles))
 
+The first call to any endpoint/page is usually processed really slowly. You just need to be patient and wait until the server responds. Refresh the page if an error occurs. 
+
 ## Project Stack
 
 | Name | Purpose | Link |

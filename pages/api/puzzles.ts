@@ -19,9 +19,9 @@ export default async function handler(
 
         Puzzle.count().exec(function(err, count){
 
-        var random = Math.floor(Math.random() * count);
+        var random = Math.floor(Math.random() * count); // generate a random puzzle index
 
-        Puzzle.findOne<IPuzzle>().skip(random).exec(
+        Puzzle.findOne<IPuzzle>().skip(random).exec( // select the random-th puzzle from the DB 
             function (err, p) {
 
             // result is random 
@@ -41,6 +41,9 @@ export default async function handler(
       }
       break;
     
+    /**
+     * Endpoint that receives puzzles from external puzzle generators.
+     */
     case "POST":
       console.log("RECEIVED PUZZLE")
     let puzzle = req.body;
@@ -48,6 +51,7 @@ export default async function handler(
       try {
         let puzzle = req.body;
 
+        // simple parsing of data into puzzle object
         let p = await Puzzle.create({expected_line: puzzle.expected_line, start_position: puzzle.start_position});        
 
         if (p) {
