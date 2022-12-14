@@ -27,7 +27,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       customer: user["stripeCustomerId"],
       line_items: [
         {
-          price: "price_1MDeM4CuDA0kgBaoAcji6grF",
+          price: process.env.STRIPE_PRODUCT_PRICE_ID,
           quantity: 1,
         },
       ],
