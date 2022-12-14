@@ -1,11 +1,7 @@
-import { getSession } from "next-auth/react";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import "../../../lib/databaseConnection";
 import User, { type IUser } from "../../../models/User";
-
-import { unstable_getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]";
 
 enum ERROR_CODE {
   success,
@@ -18,6 +14,9 @@ export default async function handler(
 ) {
   const { method } = req;
 
+  /**
+   * Unauthenticated endpoint for fetching userdata from a user's ID.
+   */
   switch (method) {
     case "POST":
       try {

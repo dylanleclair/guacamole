@@ -9,14 +9,14 @@ import { postJSON } from "../../../utils/networkingutils";
 
 var PROXY = "http://sf-engine:8228/";
 
+/**
+ * Interface representing datatype for AI evaluation of a position.
+ * Returns the top move, along with the three best lines and a win-draw-loss statistic predicting outcome of the position.
+ */
 export interface Evaluation {
   move: string;
   wdl: string[];
   topLines: string[][];
-}
-
-interface MoveReply {
-  move: String;
 }
 
 /**
@@ -37,7 +37,6 @@ async function fetchBestMove(fen: string): Promise<any> {
       .then((data) => {
         // parse the move!!!
         if (data) {
-          console.log("AI replied: ", data);
           return data;
         }
       });
@@ -60,10 +59,9 @@ export default async function handler(
   switch (method) {
     case "POST":
       try {
-        const analysis = await fetchBestMove(req.body.fen);
+        const analysis = await fetchBestMove(req.body.fen); // send fetch to AI microservice
 
-        const bestMove = analysis.move;
-        res.status(200).json({ move: analysis.move, wdl: analysis.wdl, topLines: analysis.top_3 });
+        res.status(200).json({ move: analysis.move, wdl: analysis.wdl, topLines: analysis.top_3 }); // return the data thru API
       } catch (err) {
         console.log(err);
         res.status(400).json({ move: "", wdl: [], topLines: []});

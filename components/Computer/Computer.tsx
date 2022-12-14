@@ -138,8 +138,6 @@ export default function ComputerBoard(props: ComputerProps) {
 
   function resign() {
 
-    let color = state.isPlayerWhite ? "white" : "black";
-    
     let matchData = { winner: "", method: "" };
 
     matchData.method = "resignation";

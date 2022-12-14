@@ -50,30 +50,13 @@ const Upgrade: NextPage = () => {
               <div className="bg-primary rounded-4 bg-light p-4 mb-4">
                 <h2 className="fw-bold">AI Powered Game Review</h2>
                 <p>
-                  A very appealing and interesting description to make sure they
-                  want to pay us $5!
+                  Improve your chess skills with the power of AI!
                 </p>
               </div>
-              <div className="bg-primary rounded-4 bg-light p-4 mb-4">
-                <h2 className="fw-bold">Unlimited Online Chess Games</h2>
-                <p>
-                  A very appealing and interesting description to make sure they
-                  want to pay us $5!
-                </p>
-              </div>
-
               <div className="bg-primary rounded-4 bg-light p-4 mb-4">
                 <h2 className="fw-bold">Unlimited Puzzles</h2>
                 <p>
-                  A very appealing and interesting description to make sure they
-                  want to pay us $5!
-                </p>
-              </div>
-              <div className="bg-primary rounded-4 bg-light p-4">
-                <h2 className="fw-bold">Adjustable Bot Difficulty</h2>
-                <p>
-                  A very appealing and interesting description to make sure they
-                  want to pay us $5!
+                  Play as many of our AI-generated chess puzzles as you like!
                 </p>
               </div>
             </div>

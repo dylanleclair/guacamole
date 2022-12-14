@@ -1,7 +1,11 @@
 import { css } from "@emotion/react";
-import { NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+
+
+/**
+ * The shared navbar / footer component rendered everywhere!
+ */
 
 type LayoutProps = {
   children: React.ReactNode;

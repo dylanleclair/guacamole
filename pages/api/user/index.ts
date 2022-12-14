@@ -10,6 +10,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IUser | string>
 ) {
+  /**
+   * Is an authenticated endpoint. More or less your basic CRUD (without the delete) setup.
+   */
   const session = await unstable_getServerSession(req, res, authOptions);
   const { method } = req;
 
