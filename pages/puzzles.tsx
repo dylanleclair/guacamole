@@ -322,7 +322,7 @@ const Home: NextPage = () => {
                 <div className="d-flex gap-2">
                   <button
                     className="btn btn-sm btn-dark ml-1"
-                    onClick={flipBoard}
+                    onClick={handleClose}
                   >
                     <i className="bi bi-arrow-right-circle"></i> Next Puzzle
                   </button>
